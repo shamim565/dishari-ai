@@ -1,0 +1,83 @@
+{% load static %}
+<!doctype html>
+<html lang="{{ lang }}" class="h-full">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#020617">
+  <meta name="description" content="{{ t.app_full_name }} · {{ t.tagline }}">
+  <title>{% block title %}{{ t.app_name }}{% endblock %}</title>
+  <link rel="manifest" href="{% static 'manifest.webmanifest' %}">
+  <link rel="icon" type="image/png" href="{% static 'img/icons/icon-192.png' %}">
+  <link rel="apple-touch-icon" href="{% static 'img/icons/icon-192.png' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem("swHealed") === "1") return;
+        localStorage.setItem("swHealed", "1");
+      } catch (e) {
+        return;
+      }
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker
+          .getRegistrations()
+          .then(function (regs) {
+            regs.forEach(function (reg) {
+              reg.unregister();
+            });
+          })
+          .catch(function () {});
+      }
+      if (window.caches && caches.keys) {
+        caches
+          .keys()
+          .then(function (keys) {
+            keys.forEach(function (key) {
+              caches.delete(key);
+            });
+          })
+          .catch(function () {});
+      }
+    })();
+  </script>
+  <script src="{% static 'vendor/tailwind.js' %}"></script>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <script src="{% static 'js/voice.js' %}"></script>
+  <script defer src="{% static 'vendor/alpine.min.js' %}"></script>
+  <script defer src="{% static 'vendor/htmx.min.js' %}"></script>
+  <script defer src="{% static 'js/notifications.js' %}"></script>
+  <script defer src="{% static 'js/app.js' %}"></script>
+  <script>
+    window.NOTIFY_CONFIG = {
+      pollUrl: "{% url 'api_notifications' %}",
+      ttsUrl: "{% url 'voice_tts' %}",
+      csrf: "{{ csrf_token }}",
+      lang: "{{ lang }}",
+      strings: {
+        urgent: "{{ t.notif_urgent|escapejs }}",
+        refresh: "{{ t.notif_refresh|escapejs }}"
+      }
+    };
+  </script>
+  <script>
+    window.KIOSK_CONFIG = {
+      active: true,
+      idleSeconds: {{ kiosk_idle_seconds }},
+      endUrl: "{% url 'session_end' %}",
+      homeUrl: "{% url 'home' %}",
+      csrf: "{{ csrf_token }}"
+    };
+  </script>
+</head>
+<body class="min-h-dvh bg-slate-950 text-slate-100 antialiased selection:bg-amber-400/30 {% block body_class %}{% endblock %}">
+  <div class="app-bg" aria-hidden="true"></div>
+  {% block chrome %}
+  <div class="app-shell relative mx-auto flex min-h-dvh w-full max-w-md flex-col">
+    {% include "partials/_header.html" %}
+    <main class="flex-1 px-4 pb-32 pt-5">
+      {% block content %}{% endblock %}
+    </main>
+    {% include "partials/_tiles_dock.html" %}
