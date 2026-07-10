@@ -136,3 +136,91 @@ STRINGS = {
     },
     "quick_flight_desc": {
         "bn": "লাইভ আপডেট ও অ্যালার্ট",
+        "en": "Live updates & alerts",
+    },
+    "chip_soon": {
+        "bn": "শীঘ্রই",
+        "en": "Soon",
+    },
+    "coming_soon_title": {
+        "bn": "শীঘ্রই আসছে",
+        "en": "Coming soon",
+    },
+    "coming_soon_body": {
+        "bn": "Dishari AI-এর এই অংশটি এখন তৈরি হচ্ছে।",
+        "en": "This part of Dishari AI is being prepared.",
+    },
+    "back_home": {
+        "bn": "হোমে ফিরুন",
+        "en": "Back to home",
+    },
+    "demo_badge": {
+        "bn": "ডেমো বিল্ড",
+        "en": "Demo build",
+    },
+    "ticket_page_title": {
+        "bn": "আপনার টিকিট স্ক্যান করুন",
+        "en": "Scan your ticket",
+    },
+    "ticket_page_sub": {
+        "bn": "টিকিট বা বোর্ডিং পাসের পরিষ্কার ছবি থেকে AI আপনার ফ্লাইট যাচাই করবে — ছবিটি পড়ার পর মুছে ফেলা হয়, কোথাও জমা থাকে না।",
+        "en": "AI verifies your flight from a clear photo of your ticket or boarding pass — the photo is read once and never stored.",
+    },
+    "ticket_qr_sub": {
+        "bn": "ফোনে QR কোডটি স্ক্যান করে টিকিটের ছবি আপলোড করুন — কিয়স্কে যাত্রা নিজে থেকেই শুরু হয়ে যাবে।",
+        "en": "Scan the QR code with your phone and upload your ticket photo — your journey starts here automatically.",
+    },
+    "ticket_qr_waiting": {
+        "bn": "ফোনের অপেক্ষায়…",
+        "en": "Waiting for your phone…",
+    },
+    "ticket_qr_or_url": {
+        "bn": "অথবা ফোনের ব্রাউজারে এই লিংকটি খুলুন",
+        "en": "Or open this link in your phone's browser",
+    },
+    "ticket_phone_title": {
+        "bn": "টিকিট আপলোড করুন",
+        "en": "Upload your ticket",
+    },
+    "ticket_phone_done_title": {
+        "bn": "টিকিট পাওয়া গেছে",
+        "en": "Ticket received",
+    },
+    "ticket_phone_done_body": {
+        "bn": "কিয়স্ক স্ক্রিনে আপনার যাত্রা শুরু হয়ে গেছে — এখন এই পেজটি বন্ধ করতে পারেন।",
+        "en": "Your journey has started on the kiosk screen — you can close this page now.",
+    },
+    "ticket_phone_expired_title": {
+        "bn": "এই লিংকটি আর কাজ করছে না",
+        "en": "This link no longer works",
+    },
+    "ticket_phone_expired_body": {
+        "bn": "কিয়স্ক স্ক্রিনে ফিরে নতুন QR কোডটি স্ক্যান করুন।",
+        "en": "Go back to the kiosk screen and scan the new QR code.",
+    },
+    "take_photo_btn": {
+        "bn": "ছবি তুলুন",
+        "en": "Take photo",
+    },
+    "upload_image_btn": {
+        "bn": "গ্যালারি থেকে দিন",
+        "en": "Upload image",
+    },
+    "reading_ticket": {
+        "bn": "টিকিট পড়া হচ্ছে…",
+        "en": "Reading your ticket…",
+    },
+    "reading_note": {
+        "bn": "কয়েক সেকেন্ড সময় লাগতে পারে",
+        "en": "This can take a few seconds",
+    },
+    "privacy_note": {
+        "bn": "আপনার ছবি প্রক্রিয়া করার পর মুছে ফেলা হয় — সংরক্ষণ করা হয় না।",
+        "en": "Your photo is processed in memory and deleted after reading — never stored.",
+    },
+    "demo_mode_title": {
+        "bn": "AI কী নেই — ডেমো মোড চালু আছে",
+        "en": "No AI key configured — demo mode available",
+    },
+    "demo_mode_body": {
+        "bn": "এখন আপনি ডেমো টিকিট বেছে নিয়ে পুরো যাত্রা দেখতে পারেন।",
