@@ -1,0 +1,19 @@
+<header class="app-header sticky top-0 z-20">
+  <div class="header-inner mx-auto flex w-full max-w-md items-center justify-between gap-3 px-4 py-3">
+    <a href="{% url 'home' %}" class="flex min-w-0 items-center gap-2.5">
+      <span class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5" aria-hidden="true">
+          <path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z"/>
+        </svg>
+      </span>
+      <div class="min-w-0">
+        <p class="truncate text-sm font-semibold leading-tight">{{ t.app_name }}</p>
+        <p class="truncate text-[11px] leading-tight text-slate-400">{{ t.airport_name }}</p>
+      </div>
+    </a>
+    <div class="flex items-center gap-2">
+      <form method="post" action="{% url 'session_end' %}">
+        {% csrf_token %}
+        <button type="submit" class="lang-pill">{{ t.kiosk_end_btn }}</button>
+      </form>
+      <a href="{% url 'notifications' %}" class="lang-pill flex h-9 w-9 items-center justify-center !p-0" aria-label="{{ t.notif_title }}">
