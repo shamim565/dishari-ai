@@ -44,3 +44,24 @@ class EffectiveStatusTests(TestCase):
             est_departure=est.time() if est else None,
             status=status,
         )
+
+    def test_time_windows(self):
+        cases = [
+            (240, Flight.STATUS_SCHEDULED),
+            (120, Flight.STATUS_CHECK_IN_OPEN),
+            (50, Flight.STATUS_CHECK_IN_CLOSED),
+            (30, Flight.STATUS_BOARDING),
+            (10, Flight.STATUS_FINAL_CALL),
+            (-5, Flight.STATUS_GATE_CLOSED),
+            (-30, Flight.STATUS_DEPARTED),
+        ]
+        for minutes, expected in cases:
+            with self.subTest(minutes=minutes):
+                self.assertEqual(self.make(minutes).effective_status(self.NOW), expected)
+
+    def test_grace_window_before_departed(self):
+        self.assertEqual(self.make(-10).effective_status(self.NOW), Flight.STATUS_GATE_CLOSED)
+
+    def test_cancelled_always_wins(self):
+        flight = self.make(240, status=Flight.STATUS_CANCELLED)
+        self.assertEqual(flight.effective_status(self.NOW), Flight.STATUS_CANCELLED)
