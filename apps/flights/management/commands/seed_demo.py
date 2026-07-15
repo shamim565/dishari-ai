@@ -124,3 +124,19 @@ FLIGHTS = [
         "terminal": "Terminal 2",
     },
 ]
+
+
+class Command(BaseCommand):
+    help = "Reset and seed the mock AODB with today's demo flights (DAC departures)."
+
+    @transaction.atomic
+    def handle(self, *args, **options):
+        TicketHandoff.objects.all().delete()
+        TicketScan.objects.all().delete()
+        JourneySession.objects.all().delete()
+        Flight.objects.all().delete()
+        Airline.objects.all().delete()
+        Airport.objects.all().delete()
+
+        airports = {code: Airport.objects.create(code=code, city=city, name=name, bangla_city=bn) for code, city, name, bn in AIRPORTS}
+        airlines = {code: Airline.objects.create(code=code, name=name, bangla_name=bn) for code, name, bn in AIRLINES}
