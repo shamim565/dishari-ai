@@ -82,3 +82,53 @@ class Flight(models.Model):
     terminal = models.CharField(max_length=20, blank=True)
     boarding_time = models.TimeField(null=True, blank=True)
     duration_minutes = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["sched_departure"]
+        constraints = [models.UniqueConstraint(fields=["number", "date"], name="unique_flight_per_day")]
+
+    def __str__(self):
+        return f"{self.number} {self.origin.code}->{self.destination.code} {self.date} {self.sched_departure}"
+
+    @property
+    def effective_departure(self):
+        return self.est_departure or self.sched_departure
+
+    @property
+    def is_delayed(self):
+        return bool(self.est_departure and self.est_departure != self.sched_departure) or self.status == self.STATUS_DELAYED
+
+    def time_status(self, now=None):
+        """The status implied by the clock alone (uses effective departure)."""
+        now = now or timezone.now()
+        departure = timezone.make_aware(
+            datetime.combine(self.date, self.effective_departure),
+            timezone.get_current_timezone(),
+        )
+        minutes = (departure - now).total_seconds() / 60
+        if minutes <= -DEPARTED_GRACE_MINUTES:
+            return self.STATUS_DEPARTED
+        if minutes <= 0:
+            return self.STATUS_GATE_CLOSED
+        if minutes <= FINAL_CALL_BEFORE_MINUTES:
+            return self.STATUS_FINAL_CALL
+        if minutes <= BOARDING_BEFORE_MINUTES:
+            return self.STATUS_BOARDING
+        if minutes <= CHECKIN_CLOSE_BEFORE_MINUTES:
+            return self.STATUS_CHECK_IN_CLOSED
+        if minutes <= CHECKIN_OPEN_LEAD_MINUTES:
+            return self.STATUS_CHECK_IN_OPEN
+        return self.STATUS_SCHEDULED
+
+    def effective_status(self, now=None):
+        """Real-time-aware status.
+
+        Manual statuses may advance the narrative early (ops control), but the
+        clock always supersedes stale ones. CANCELLED always wins; DELAYED is
+        respected through ``effective_departure`` (est_departure).
+        """
+        if self.status == self.STATUS_CANCELLED:
+            return self.STATUS_CANCELLED
+        time_phase = self.time_status(now)
+        manual = self.status if self.status in self.STATUS_PHASE_ORDER else self.STATUS_SCHEDULED
+        return max(time_phase, manual, key=self.STATUS_PHASE_ORDER.index)
