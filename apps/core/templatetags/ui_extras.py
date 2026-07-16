@@ -35,3 +35,24 @@ def bn_name(obj, lang="en"):
         if value:
             return value
     return getattr(obj, "name", "") or getattr(obj, "city", "") or str(obj)
+
+
+@register.filter
+def city_name(airport, lang="en"):
+    if lang == "bn" and airport.bangla_city:
+        return airport.bangla_city
+    return airport.city
+
+
+@register.filter
+def airport_time(value, lang="en"):
+    return format_clock(value, lang)
+
+
+@register.filter
+def tkey(key, lang="en"):
+    return translate(key, lang)
+
+
+@register.filter
+def duration_label(minutes, lang="en"):
