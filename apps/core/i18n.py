@@ -224,3 +224,120 @@ STRINGS = {
     },
     "demo_mode_body": {
         "bn": "এখন আপনি ডেমো টিকিট বেছে নিয়ে পুরো যাত্রা দেখতে পারেন।",
+        "en": "For now you can pick a demo ticket to experience the full journey.",
+    },
+    "demo_tickets_btn": {
+        "bn": "ডেমো টিকিট দেখুন",
+        "en": "Try demo tickets",
+    },
+    "demo_tickets_close_btn": {
+        "bn": "ডেমো টিকিট বন্ধ করুন",
+        "en": "Close demo tickets",
+    },
+    "demo_picker_title": {
+        "bn": "ডেমো টিকিট বেছে নিন",
+        "en": "Choose a demo ticket",
+    },
+    "demo_picker_sub": {
+        "bn": "আজকের যেকোনো ফ্লাইট বেছে নিন — টিকিট যাচাই হয়ে যাত্রা শুরু হবে।",
+        "en": "Pick any of today's flights to simulate a verified ticket.",
+    },
+    "use_ticket_btn": {
+        "bn": "এই টিকিট ব্যবহার করুন",
+        "en": "Use this ticket",
+    },
+    "back_to_scan": {
+        "bn": "ছবি তুলে স্ক্যান করুন",
+        "en": "Scan a photo instead",
+    },
+    "verified_title": {
+        "bn": "ফ্লাইট যাচাই সম্পন্ন",
+        "en": "Flight verified",
+    },
+    "verified_sub": {
+        "bn": "আপনার যাত্রার সেশন তৈরি হয়েছে।",
+        "en": "Your journey session has been created.",
+    },
+    "passenger_label": {
+        "bn": "যাত্রী",
+        "en": "Passenger",
+    },
+    "flight_label": {
+        "bn": "ফ্লাইট",
+        "en": "Flight",
+    },
+    "date_label": {
+        "bn": "তারিখ",
+        "en": "Date",
+    },
+    "departure_label": {
+        "bn": "ছাড়ার সময়",
+        "en": "Departure",
+    },
+    "arrival_label": {
+        "bn": "পৌঁছাবে",
+        "en": "Arrival",
+    },
+    "arrival_next_day": {
+        "bn": "পরদিন",
+        "en": "next day",
+    },
+    "counter_label": {
+        "bn": "চেক-ইন কাউন্টার",
+        "en": "Check-in counters",
+    },
+    "block_label": {
+        "bn": "ব্লক",
+        "en": "Block",
+    },
+    "gate_label": {
+        "bn": "গেট",
+        "en": "Gate",
+    },
+    "seat_label": {
+        "bn": "আসন",
+        "en": "Seat",
+    },
+    "pnr_label": {
+        "bn": "বুকিং (PNR)",
+        "en": "Booking (PNR)",
+    },
+    "status_label": {
+        "bn": "স্ট্যাটাস",
+        "en": "Status",
+    },
+    "terminal_label": {
+        "bn": "টার্মিনাল",
+        "en": "Terminal",
+    },
+    "pending_label": {
+        "bn": "এখনো নির্ধারিত হয়নি",
+        "en": "Not assigned yet",
+    },
+    "continue_btn": {
+        "bn": "এগিয়ে যান",
+        "en": "Continue",
+    },
+    "new_scan_btn": {
+        "bn": "অন্য টিকিট স্ক্যান করুন",
+        "en": "Scan another ticket",
+    },
+    "journey_card_title": {
+        "bn": "আপনার যাত্রা",
+        "en": "Your journey",
+    },
+    "open_journey_btn": {
+        "bn": "যাত্রা দেখুন",
+        "en": "Open journey",
+    },
+    "welcome_passenger": {
+        "bn": "স্বাগতম",
+        "en": "Welcome",
+    },
+    "err_bad_file": {
+        "bn": "অনুগ্রহ করে টিকিটের পরিষ্কার ছবি দিন (JPG/PNG, ১৫ MB-এর কম)।",
+        "en": "Please upload a clear photo of your ticket (JPG/PNG, under 15 MB).",
+    },
+    "err_no_flight": {
+        "bn": "আজকের এয়ারপোর্ট ডেটায় এই ফ্লাইটটি খুঁজে পাওয়া যায়নি। টিকিটটি সঠিকভাবে দেখা যাচ্ছে কিনা পরীক্ষা করুন।",
+        "en": "We could not find this flight in today's airport data. Please check that the whole ticket is visible.",
