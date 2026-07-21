@@ -58,3 +58,37 @@ def normalize_flight_number(raw_number, airline_code):
     if number.isdigit() and code:
         number = f"{code}{number}"
     return number
+
+
+def match_flight(data):
+    number = normalize_flight_number(data.get("flight_number"), data.get("airline_code"))
+    if not number:
+        return None, "err_no_flight"
+
+    today = timezone.localdate()
+    tomorrow = today + timedelta(days=1)
+    flight = (
+        Flight.objects.select_related("airline", "origin", "destination")
+        .filter(number=number, date__in=[today, tomorrow])
+        .first()
+    )
+    if not flight:
+        return None, "err_no_flight"
+
+    origin = str(data.get("origin_code") or "").strip().upper()
+    if origin and origin != flight.origin.code:
+        return None, "err_not_dac"
+
+    return flight, None
+
+
+def log_scan(*, source, success, error_code="", extraction=None, flight=None, setup=None):
+    return TicketScan.objects.create(
+        source=source,
+        success=success,
+        error_code=error_code,
+        raw_extraction=extraction or {},
+        flight=flight,
+        provider=(setup or {}).get("provider", ""),
+        model=(setup or {}).get("model", ""),
+    )
