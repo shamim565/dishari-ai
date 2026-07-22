@@ -104,3 +104,102 @@ def _finish_scan(request, *, extraction, flight, source):
     if request.headers.get("HX-Request"):
         return _journey_panel_fragment(request, journey)
     return redirect(f"{reverse('home')}?view=journey")
+
+
+def _ticket_error(request, code):
+    if request.headers.get("HX-Request"):
+        return _ticket_panel_fragment(request, code)
+    return redirect(f"{reverse('home')}?view=ticket&e={code}")
+
+
+def _process_upload(raw):
+    """Shared extraction pipeline for kiosk and phone uploads.
+
+    Returns ``(extraction, flight, error_code)`` — exactly one of flight /
+    error_code is set.  Every attempt is logged to TicketScan.
+    """
+    try:
+        image_bytes, mime_type = normalize_ticket_image(raw)
+    except UnsupportedImage:
+        log_scan(source="upload", success=False, error_code="bad_file")
+        return None, None, "bad_file"
+
+    if not registry.vision_available():
+        log_scan(source="upload", success=False, error_code="ai_unavailable")
+        return None, None, "ai"
+
+    try:
+        extraction, setup = extract_ticket_data(image_bytes, mime_type)
+    except VisionUnavailable:
+        log_scan(source="upload", success=False, error_code="ai_unavailable")
+        return None, None, "ai"
+    except ExtractionFailed:
+        log_scan(source="upload", success=False, error_code="extract_failed")
+        return None, None, "extract"
+
+    flight, error_code = match_flight(extraction)
+    if not flight:
+        log_scan(source="upload", success=False, error_code=error_code, extraction=extraction, setup=setup)
+        return None, None, "not_dac" if error_code == "err_not_dac" else "no_flight"
+
+    log_scan(source="upload", success=True, extraction=extraction, flight=flight, setup=setup)
+    return extraction, flight, None
+
+
+@require_POST
+def ticket_scan(request):
+    upload = request.FILES.get("ticket_image")
+    if not upload:
+        return _ticket_error(request, "bad_file")
+
+    extraction, flight, code = _process_upload(upload.read())
+    if code:
+        return _ticket_error(request, code)
+    return _finish_scan(request, extraction=extraction, flight=flight, source="upload")
+
+
+def ticket_demo(request):
+    return redirect(f"{reverse('home')}?view=ticket")
+
+
+@require_POST
+def ticket_demo_pick(request, pk):
+    flights = list(todays_flights())
+    flight = next((f for f in flights if f.pk == pk), None)
+    if not flight:
+        return redirect(f"{reverse('home')}?view=ticket")
+    index = next((i for i, f in enumerate(flights) if f.pk == pk), 0)
+    data = ticket_data(flight, index)
+    log_scan(source="demo", success=True, flight=flight)
+    extraction = {
+        "passenger_name": data["name_display"],
+        "airline_code": flight.airline.code,
+        "flight_number": flight.number,
+        "origin_code": flight.origin.code,
+        "destination_code": flight.destination.code,
+        "seat": data["seat"],
+        "pnr": data["pnr"],
+    }
+    return _finish_scan(request, extraction=extraction, flight=flight, source="demo")
+
+
+def ticket_verified(request):
+    return redirect(f"{reverse('home')}?view=journey")
+
+
+# --------------------------------------------------------------------------- #
+# Kiosk ⇄ phone handoff
+# --------------------------------------------------------------------------- #
+
+
+def _kiosk_handoff_or_404(request, token):
+    if request.session.get(HANDOFF_KEY) != token:
+        raise Http404
+    handoff = TicketHandoff.objects.filter(token=token).first()
+    if not handoff:
+        raise Http404
+    return handoff
+
+
+def ticket_handoff_status(request, token):
+    """Polled by the kiosk panel every few seconds.
