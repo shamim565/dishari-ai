@@ -1002,3 +1002,360 @@ body {
   background: rgba(244, 63, 94, 0.18);
   color: #fda4af;
 }
+
+.toast-title {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #fbbf24;
+}
+
+.toast-urgent .toast-title {
+  color: #fda4af;
+}
+
+.toast-msg {
+  margin-top: 0.2rem;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: #e2e8f0;
+}
+
+.toast-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.55rem;
+}
+
+.toast-btn {
+  font-size: 0.72rem;
+  font-weight: 500;
+  padding: 0.3rem 0.65rem;
+  border-radius: 0.65rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #cbd5e1;
+}
+
+.toast-btn:active {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+@keyframes toastin {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+}
+
+.ops-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  color: #e2e8f0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.45rem 0.8rem;
+  transition: background 0.15s ease;
+}
+
+.ops-btn:hover,
+.ops-btn:active {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.ops-btn-go {
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.1);
+  color: #6ee7b7;
+}
+
+.ops-btn-warn {
+  border-color: rgba(251, 191, 36, 0.4);
+  background: rgba(251, 191, 36, 0.08);
+  color: #fcd34d;
+}
+
+.ops-btn-urgent {
+  border-color: rgba(244, 63, 94, 0.5);
+  background: rgba(244, 63, 94, 0.12);
+  color: #fda4af;
+}
+
+.ops-btn-danger {
+  border-color: rgba(244, 63, 94, 0.4);
+  color: #fda4af;
+}
+
+.ops-input {
+  width: 100%;
+  border-radius: 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(2, 6, 23, 0.6);
+  color: #f1f5f9;
+  font-size: 0.78rem;
+  padding: 0.45rem 0.7rem;
+}
+
+.ops-input::placeholder {
+  color: #64748b;
+}
+
+.ops-input-sm {
+  max-width: 5rem;
+}
+
+.ops-inline {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  border-radius: 0.9rem;
+  border: 1px dashed rgba(148, 163, 184, 0.25);
+  padding: 0.6rem;
+}
+
+
+
+
+
+
+
+
+.assistant-stage {
+  width: 100%;
+  text-align: center;
+}
+
+.replay-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  background: rgba(251, 191, 36, 0.08);
+  color: #fcd34d;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.55rem 1.05rem;
+  transition: background 0.15s ease;
+}
+
+.replay-btn:active {
+  background: rgba(251, 191, 36, 0.18);
+}
+
+.session-stop-btn {
+  width: 2.7rem;
+  height: 2.7rem;
+  border-radius: 9999px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(244, 63, 94, 0.45);
+  background: rgba(244, 63, 94, 0.1);
+  color: #fda4af;
+  transition: background 0.15s ease;
+}
+
+.session-stop-btn:active {
+  background: rgba(244, 63, 94, 0.2);
+}
+
+.session-stop-btn svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+@media (min-width: 1024px) {
+  .page-wide .app-shell,
+  .page-wide .header-inner,
+  .page-wide .nav-inner {
+    max-width: 76rem;
+  }
+}
+/* ============================================================
+   NIGHT APPROACH — kiosk design system
+   ============================================================ */
+
+/* ---------- palette ---------- */
+:root {
+  --base: #050a09;
+  --surface: rgba(16, 40, 34, 0.55);
+  --surface-strong: rgba(9, 24, 20, 0.92);
+  --hairline: rgba(110, 231, 183, 0.14);
+  --text: #e6f0ec;
+  --muted: #7b8f88;
+
+  --accent: #10b981;
+  --accent-ink: #a7f3d0;
+  --accent-tint: rgba(6, 78, 59, 0.35);
+
+  --beacon: #fbbf24;
+  --beacon-ink: #fde68a;
+
+  --cta-1: #fcd34d;
+  --cta-2: #f59e0b;
+  --cta-ink: #431407;
+
+  --logo-1: #10352c;
+  --logo-2: #06120e;
+  --logo-ink: #fbbf24;
+  --logo-border: rgba(52, 211, 153, 0.35);
+
+  --aurora-1: rgba(16, 185, 129, 0.16);
+  --aurora-2: rgba(251, 191, 36, 0.09);
+
+  --orb-main-1: #6ee7b7;
+  --orb-main-2: #10b981;
+  --orb-main-3: #065f46;
+  --orb-main-4: #032920;
+  --orb-main-ink: #ecfdf5;
+
+  --orb-bright-1: #a7f3d0;
+  --orb-bright-2: #34d399;
+  --orb-bright-3: #047857;
+  --orb-bright-4: #022c22;
+  --orb-bright-ink: #022c22;
+
+  --orb-dim-1: #35564c;
+  --orb-dim-2: #1f3b33;
+  --orb-dim-3: #10201b;
+  --orb-dim-ink: #9fb8af;
+
+  --orb-beacon-1: #fde68a;
+  --orb-beacon-2: #f59e0b;
+  --orb-beacon-3: #b45309;
+  --orb-beacon-4: #4a2503;
+  --orb-beacon-ink: #2a1102;
+
+  --glow-main: #10b981;
+  --glow-beacon: #f59e0b;
+}
+
+/* ============================================================
+   Component layer — everything consumes theme tokens
+   ============================================================ */
+
+body {
+  color: var(--text);
+  background-color: var(--base);
+}
+
+.app-bg {
+  background:
+    radial-gradient(90% 60% at 12% -10%, var(--aurora-1), transparent 60%),
+    radial-gradient(80% 55% at 100% 110%, var(--aurora-2), transparent 65%),
+    var(--base);
+}
+
+.app-header {
+  border-bottom: 1px solid var(--hairline);
+  background: color-mix(in srgb, var(--base) 78%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 12px 40px -24px rgba(0, 0, 0, 0.5);
+}
+
+.logo-mark {
+  background: linear-gradient(150deg, var(--logo-1), var(--logo-2));
+  border: 1px solid var(--logo-border);
+  color: var(--logo-ink);
+  box-shadow: 0 0 26px -8px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+.lang-pill {
+  border: 1px solid var(--hairline);
+  background: var(--accent-tint);
+  color: var(--text);
+}
+
+.lang-pill:active,
+.lang-pill:hover {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow:
+    0 30px 70px -35px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.journey-empty {
+  border: 1px dashed color-mix(in srgb, var(--accent) 40%, transparent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.quick-tile {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.quick-tile:active,
+.quick-tile:hover {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+.quick-tile-icon {
+  background: color-mix(in srgb, var(--accent) 13%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent);
+  color: var(--beacon);
+}
+
+.btn-primary {
+  background: linear-gradient(180deg, var(--cta-1), var(--cta-2));
+  color: var(--cta-ink);
+  box-shadow: 0 16px 44px -18px color-mix(in srgb, var(--cta-2) 65%, transparent);
+}
+
+.btn-secondary {
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: var(--text);
+}
+
+.btn-secondary:active {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.chip-neutral {
+  background: var(--accent-tint);
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+  color: var(--accent-ink);
+}
+
+.chip-warn {
+  background: color-mix(in srgb, var(--beacon) 13%, transparent);
+  border-color: color-mix(in srgb, var(--beacon) 38%, transparent);
+  color: var(--beacon-ink);
+}
+
+.chip-muted {
+  background: color-mix(in srgb, var(--muted) 14%, transparent);
+  border-color: color-mix(in srgb, var(--muted) 32%, transparent);
+  color: var(--muted);
+}
+
+.nav-shell {
+  border: 1px solid var(--hairline);
+  background: var(--surface-strong);
+  box-shadow: 0 30px 60px -25px rgba(0, 0, 0, 0.6);
+}
+
+.nav-item {
+  position: relative;
+  color: var(--muted);
+}
+
+.nav-item-active {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent-ink);
+}
