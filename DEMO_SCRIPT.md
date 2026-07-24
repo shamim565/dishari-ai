@@ -70,3 +70,40 @@ uv run manage.py runserver 0.0.0.0:8000
 5. Silence is safe: three quiet turns pause the conversation with **"আবার শুরু করুন"**; tap to resume. The red **⏹ button** ends the voice session; **🔁 আবার শুনুন** replays the last answer
 6. Language: the header **English/বাংলা** pill switches the whole kiosk instantly
 7. Point out: answers use **only airport data** — the AI never invents a gate or time
+
+**Operator twist:** laptop → **Gate change → 12**. The kiosk speaks urgently: *"গুরুত্বপূর্ণ: আপনার বোর্ডিং গেট পরিবর্তন হয়ে 12 হয়েছে।"* The map and "পথ দেখান" now route to Gate 12.
+
+---
+
+## 6. Safety nets that matter (1 min)
+
+1. Say: **"আমার পাসপোর্ট হারিয়ে গেছে"** → the assistant immediately routes you by voice to the **airport police help desk**
+2. Say something meaningless → it admits it cannot answer and offers the **information desk** (human handoff)
+3. Ask **"কানেক্টিং ফ্লাইট আছে"** → transit steps spoken; tile **ট্রান্সজিট ও আগমন** → full arrival guide (immigration → baggage → customs → exit)
+
+---
+
+## 7. Closing — Boarding + intelligence (1 min)
+
+1. Operator: **Boarding** → the kiosk announces boarding; dashboard switches to *"বোর্ডিং শুরু — এখনই গেটে যান!"*
+2. Tap **সম্পন্ন — পরের ধাপ** until **"বোর্ডিং সম্পন্ন — শুভ যাত্রা!"** → link to the arrival guide
+3. Laptop ops panel: **Passenger intelligence** (top questions, বাংলা/English split), live sessions, event log
+4. Wrap-up line: *"এয়ারপোর্টের তথ্য একই থাকে — কিন্তু এখন প্রতিটি যাত্রীর জন্য তা একান্ত ব্যক্তিগত, বাংলায়, সময়মতো।"*
+
+Close with: **Reset demo data** on the ops panel (or `uv run manage.py demo_setup`) for the next run.
+
+---
+
+## If something goes wrong
+
+| Problem | Fix |
+|---|---|
+| No AI answers | Demo mode is intentional — all golden-path questions still work |
+| No voice | Check the browser's speech permission; the kiosk needs internet for recognition |
+| Mic disabled | The panel shows the reason: needs HTTPS/localhost, or add `AZURE_SPEECH_KEY` and use Chrome |
+| Old UI after updates | Hard-refresh once (the v2 service worker replaces the old cache); a second reload guarantees fresh assets |
+| Voice acts stuck | Open `/?voicedebug=1` and watch the Console — `[voice]`/`[chat]` traces show exactly which step stalled (tts fetch, audio.play, synthesis onstart, watchdog) |
+| Kiosk idle reset | After `KIOSK_IDLE_SECONDS` the "আছেন?" overlay appears; no answer resets to a fresh dashboard — tap the mic to restart (while a phone upload page is open the kiosk stays awake automatically) |
+| Phone can't open the QR link | Phone and kiosk must share the Wi-Fi and `BASE_URL` must be the laptop's LAN IP (or a tunnel) — see §0.4 |
+| Lost the journey | Open `/ticket/demo/` and pick BG147 again |
+| Messy data | Operator panel → **Reset demo data** |
