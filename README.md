@@ -89,3 +89,45 @@ If the configured provider key is missing, the layer falls back to the other pro
 6. The bottom dock holds ম্যাপ / ট্রান্সজিট ও আগমন / বিজ্ঞপ্তি; language toggle switches the whole kiosk to English
 
 ## Demo checklist — Sprint 4 (Indoor Navigation + QR Markers)
+
+Prerequisite: `uv run manage.py seed_nav`
+
+1. Dashboard → **পথ দেখান** → directions to the right place for your current stage (check-in block → immigration → security → gate)
+2. Directions page: SVG terminal map with dashed animated route, "You are here" marker, numbered steps with distances, and the **signage card** to look for
+3. Scan a QR marker (`demo_assets/qr_markers/marker_sheet.html`, printable): e.g. `A01` at the entrance → position updates instantly with mini-map confirmation
+4. **এয়ারপোর্ট ম্যাপ** (home quick tile) → full map with all places, tap any place → directions from your position
+5. **আমি পথ হারিয়েছি** → one step at a time: instruction + sign photo card + হ্যাঁ/না buttons; "না" routes you to the information desk
+6. On the map, gate rows follow the flight data: BG147 has no gate yet → route stops at the airside corridor with a "gate not announced" note; EK585 → route to Gate 8
+7. All instructions are bilingual (Bangla route text comes from the airport database, not the AI)
+
+## Demo checklist — Sprint 5 (Voice Companion)
+
+1. On the kiosk dashboard, tap the mic once → the assistant **speaks first** and listening starts automatically
+2. Say **"এখন আমি কী করব?"** → spoken reply personalized to your journey (BG147 → check-in task + wait notice)
+3. Try **"গেট কোথায়?"**, **"কত সময় বাকি?"**, **"ইমিগ্রেশন কোথায়?"** — all answers come from journey data, never invented
+4. With an `OPENAI_API_KEY` / `CHAT_PROVIDER` key configured: free-form questions work through the LLM, strictly grounded in the injected operational data (system prompt guardrails)
+5. The conversation continues hands-free: reply → mic re-opens; interrupt by tapping the mic while it speaks (barge-in)
+6. **🔁 আবার শুনুন** replays the last answer; **⏹** ends the voice session
+7. Bangla voice guarantee: Azure Speech (bn-BD Nabanita) when `AZURE_SPEECH_KEY` is set → device Bangla voice → English voice. All paths degrade gracefully
+8. History is kept in the background per journey session (LLM memory + ops analytics) — nothing text is shown on the kiosk
+
+### Voice-first assistant (kiosk left panel)
+
+The assistant is a **voice companion**: one tap starts a continuous spoken conversation.
+
+- **Pure voice — no chat text on screen.** The conversation is processed in the background (history is kept for LLM memory and ops analytics); the passenger only hears and speaks
+- **Voice session**: tap the mic once → the assistant greets you aloud → speak / hear the reply / mic re-opens — fully hands-free until **⏹** or idle
+- **Silence-safe**: unheard turns retry automatically; 3 quiet turns (or ~2 min of silence) pause the session with **আবার শুরু করুন**
+- **Barge-in**: tap the mic while it is speaking to cut in and ask something else; **🔁 আবার শুনুন** replays the last answer
+- Voice stack: Web Speech API → Azure Speech (fallback STT + bn-BD neural TTS) → device TTS
+
+### Voice + chat keys (`.env`)
+
+```env
+CHAT_PROVIDER=gemini           # or: openai
+CHAT_MODEL=gemini-2.5-flash    # or: gpt-4o-mini
+GEMINI_API_KEY=...
+OPENAI_API_KEY=...
+AZURE_SPEECH_KEY=...           # free tier: bn-BD TTS + STT (optional but recommended)
+AZURE_SPEECH_REGION=southeastasia
+```
