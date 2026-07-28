@@ -36,3 +36,17 @@ def get_active_journey(request):
         request.session.pop(JOURNEY_KEY, None)
         return None
     return journey
+
+
+def detach_journey(request):
+    request.session.pop(JOURNEY_KEY, None)
+
+
+def todays_flights():
+    from django.utils import timezone
+
+    return (
+        Flight.objects.select_related("airline", "origin", "destination")
+        .filter(date=timezone.localdate())
+        .order_by("sched_departure")
+    )
