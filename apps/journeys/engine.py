@@ -96,3 +96,104 @@ def timeline(journey):
         for item in items:
             item["state"] = "done"
     return items
+
+
+def next_action(journey):
+    flight = journey.flight
+    stage = journey.stage
+    status = flight.effective_status()
+
+    if stage == JourneySession.STAGE_BOARDED:
+        return {
+            "state": "done",
+            "title_key": "task_boarded_title",
+            "note_key": "task_boarded_note",
+            "warning_key": None,
+            "advance_allowed": False,
+        }
+
+    if status == flight.STATUS_CANCELLED:
+        return {
+            "state": "active",
+            "title_key": "task_cancelled_title",
+            "note_key": "task_cancelled_note",
+            "warning_key": None,
+            "advance_allowed": False,
+            "nav_target": "INFO",
+            "cancelled": True,
+        }
+
+    if status in (flight.STATUS_DEPARTED, flight.STATUS_GATE_CLOSED):
+        return {
+            "state": "active",
+            "title_key": "task_departed_title",
+            "note_key": "task_departed_note",
+            "warning_key": None,
+            "advance_allowed": False,
+            "nav_target": "INFO",
+            "missed": True,
+        }
+
+    if stage == JourneySession.STAGE_ENTERED:
+        return {
+            "state": "active",
+            "title_key": "task_entered_title",
+            "note_key": "task_entered_note",
+            "warning_key": (
+                "task_checkin_wait"
+                if status == flight.STATUS_SCHEDULED and not flight.checkin_open
+                else None
+            ),
+            "advance_allowed": True,
+        }
+    if stage == JourneySession.STAGE_CHECK_IN:
+        return {
+            "state": "active",
+            "title_key": "task_immigration_title",
+            "note_key": "task_immigration_note",
+            "warning_key": None,
+            "advance_allowed": True,
+        }
+    if stage == JourneySession.STAGE_IMMIGRATION:
+        return {
+            "state": "active",
+            "title_key": "task_security_title",
+            "note_key": "task_security_note",
+            "warning_key": None,
+            "advance_allowed": True,
+        }
+    if stage == JourneySession.STAGE_SECURITY:
+        return {
+            "state": "active",
+            "title_key": "task_airside_title",
+            "note_key": "task_airside_note",
+            "warning_key": None,
+            "advance_allowed": True,
+        }
+    if stage == JourneySession.STAGE_AIRSIDE:
+        return {
+            "state": "active",
+            "title_key": "task_gate_title",
+            "note_key": "task_gate_note",
+            "warning_key": None if flight.gate else "task_gate_pending",
+            "advance_allowed": True,
+        }
+    if stage == JourneySession.STAGE_GATE:
+        boarding = status in (
+            flight.STATUS_BOARDING,
+            flight.STATUS_FINAL_CALL,
+        )
+        return {
+            "state": "active",
+            "title_key": "task_boarding_title" if boarding else "task_gate_wait_title",
+            "note_key": "task_boarding_note" if boarding else "task_gate_wait_note",
+            "warning_key": None,
+            "advance_allowed": True,
+        }
+    return {
+        "state": "done",
+        "title_key": "task_boarded_title",
+        "note_key": "task_boarded_note",
+        "warning_key": None,
+        "advance_allowed": False,
+    }
