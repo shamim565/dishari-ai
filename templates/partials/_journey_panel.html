@@ -1,0 +1,90 @@
+{% load ui_extras %}
+<div class="space-y-5">
+  {% include "partials/_flight_strip.html" %}
+
+  <section class="{% if action.state == 'done' %}now-card now-card-done{% else %}now-card{% endif %}">
+    <div class="flex items-center justify-between gap-3">
+      <p class="now-label">{% if action.state == 'done' %}{{ t.completed_label }}{% else %}{{ t.now_label }}{% endif %}</p>
+      {% if action.warning_key %}
+      <span class="chip chip-warn">{{ t.wait_chip }}</span>
+      {% endif %}
+    </div>
+    <h2 class="mt-1.5 text-xl font-semibold leading-snug">{{ action.title_key|tkey:lang }}</h2>
+    <p class="mt-1.5 text-sm leading-relaxed text-slate-300">{{ action.note_key|tkey:lang }}</p>
+    {% if action.warning_key %}
+    <p class="mt-2 rounded-xl border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs leading-relaxed text-amber-200">
+      {{ action.warning_key|tkey:lang }}
+    </p>
+    {% endif %}
+
+    <div class="mt-3 flex flex-wrap gap-2">
+      {% if flight.checkin_counters and journey.stage == 'ENTERED' %}
+      <a href="{% url 'home' %}?view=navigate&amp;to=checkin" hx-get="{% url 'home' %}?view=navigate&amp;to=checkin" hx-target="#content-panel" hx-swap="innerHTML" hx-push-url="true" class="chip chip-neutral underline decoration-slate-500 underline-offset-2">{{ t.counter_label }} {{ flight.checkin_counters }}{% if flight.checkin_block %} · {{ t.block_label }} {{ flight.checkin_block }}{% endif %}</a>
+      {% endif %}
+      {% if journey.stage == 'AIRSIDE' or journey.stage == 'GATE' %}
+      <a href="{% url 'home' %}?view=navigate&amp;to=gate" hx-get="{% url 'home' %}?view=navigate&amp;to=gate" hx-target="#content-panel" hx-swap="innerHTML" hx-push-url="true" class="chip chip-neutral underline decoration-slate-500 underline-offset-2">
+        {{ t.gate_label }} {% if flight.gate %}{{ flight.gate }}{% else %}{{ t.pending_label }}{% endif %}
+      </a>
+      {% endif %}
+    </div>
+
+    {% if nav_target %}
+    <a href="{% url 'home' %}?view=navigate&amp;to={{ nav_target }}" hx-get="{% url 'home' %}?view=navigate&amp;to={{ nav_target }}" hx-target="#content-panel" hx-swap="innerHTML" hx-push-url="true" class="btn-secondary mt-3 w-full">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z"/>
+      </svg>
+      {{ t.navigate_btn }}
+    </a>
+    {% endif %}
+
+    {% if action.state == 'done' %}
+    <a href="{% url 'home' %}?view=arrival" hx-get="{% url 'home' %}?view=arrival" hx-target="#content-panel" hx-swap="innerHTML" hx-push-url="true" class="btn-secondary mt-4 w-full">{{ t.boarded_arrival }}</a>
+    {% endif %}
+    {% if action.advance_allowed %}
+    <form method="post" action="{% url 'journey_advance' %}" hx-post="{% url 'journey_advance' %}" hx-target="#content-panel" hx-swap="innerHTML" class="mt-4">
+      {% csrf_token %}
+      <button type="submit" class="btn-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="h-4 w-4" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+        </svg>
+        {{ t.done_btn }}
+      </button>
+    </form>
+    {% endif %}
+    {% if journey.stage != 'ENTERED' %}
+    <form method="post" action="{% url 'journey_regress' %}" hx-post="{% url 'journey_regress' %}" hx-target="#content-panel" hx-swap="innerHTML" class="mt-2.5 text-center">
+      {% csrf_token %}
+      <button type="submit" class="text-xs text-slate-500 underline decoration-slate-600 underline-offset-2">
+        {{ t.undo_btn }}
+      </button>
+    </form>
+    {% endif %}
+  </section>
+
+  {% if action.missed or action.cancelled %}
+  <section class="card px-4 py-4">
+    <p class="text-center text-xs text-slate-500">
+      {{ t.departure_label }}: {{ flight.effective_departure|airport_time:lang }}
+    </p>
+  </section>
+  {% else %}
+  <section class="card px-4 py-4">
+    <div class="count-grid">
+      {% for c in countdowns %}
+      <div class="count-cell">
+        <p class="text-[10px] uppercase tracking-wide text-slate-500">{{ c.key|tkey:lang }}</p>
+        <p class="count-value mt-1">{{ c.at|airport_time:lang }}</p>
+        <p class="mt-1.5 text-[11px] font-medium {% if c.minutes <= 0 and c.minutes >= -30 %}text-amber-300{% elif c.minutes < -30 %}text-slate-500{% else %}text-slate-400{% endif %}">
+          {{ c.minutes|duration_label:lang }}
+        </p>
+      </div>
+      {% endfor %}
+    </div>
+    <p class="mt-3 text-center text-[11px] text-slate-500">
+      {{ t.walk_note }} {{ walk_minutes }} {{ t.walk_note_suffix }}
+      {% if flight.arrival_time %}
+      · {{ t.arrival_label }} {{ flight.arrival_time|airport_time:lang }}{% if flight.arrives_next_day %} ({{ t.arrival_next_day }}){% endif %}
+      {% endif %}
+    </p>
+  </section>
+  {% endif %}
