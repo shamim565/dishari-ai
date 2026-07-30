@@ -30,3 +30,19 @@ def arrival_context(request):
 
 def arrival_guide(request):
     return redirect(f"{reverse('home')}?view=arrival")
+
+
+def _journey_panel_fragment(request, journey):
+    action = engine.next_action(journey)
+    context = {
+        "journey": journey,
+        "flight": journey.flight,
+        "action": action,
+        "countdowns": engine.countdowns(journey),
+        "timeline": engine.timeline(journey),
+        "walk_minutes": engine.WALK_TO_GATE_MINUTES,
+        "nav_target": action.get("nav_target") or STAGE_NAV_TARGETS.get(journey.stage),
+    }
+    response = render(request, "partials/_panel_journey.html", context)
+    response["HX-Push-Url"] = "/?view=journey"
+    return response
