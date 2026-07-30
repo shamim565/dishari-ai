@@ -31,3 +31,19 @@ class Command(BaseCommand):
         anonymous = ChatMessage.objects.filter(journey__isnull=True, created_at__lt=cutoff)
         anonymous_count = anonymous.count()
         anonymous.delete()
+
+        handoffs = TicketHandoff.objects.filter(expires_at__lt=cutoff)
+        handoff_count = handoffs.count()
+        handoffs.delete()
+
+        expired_sessions = Session.objects.filter(expire_date__lt=timezone.now())
+        session_count = expired_sessions.count()
+        expired_sessions.delete()
+
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Purged {journey_count} journey(s), {anonymous_count} stale chat message(s), "
+                f"{handoff_count} expired ticket handoff(s), "
+                f"{session_count} expired browser session(s)."
+            )
+        )
