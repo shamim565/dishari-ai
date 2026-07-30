@@ -341,3 +341,99 @@ STRINGS = {
     "err_no_flight": {
         "bn": "আজকের এয়ারপোর্ট ডেটায় এই ফ্লাইটটি খুঁজে পাওয়া যায়নি। টিকিটটি সঠিকভাবে দেখা যাচ্ছে কিনা পরীক্ষা করুন।",
         "en": "We could not find this flight in today's airport data. Please check that the whole ticket is visible.",
+    },
+    "err_not_dac": {
+        "bn": "এই টিকিটটি ঢাকা (DAC) থেকে ছাড়ার ফ্লাইটের নয়।",
+        "en": "This ticket is not for a departure from Dhaka (DAC).",
+    },
+    "err_ai": {
+        "bn": "এখন AI দিয়ে টিকিট পড়া যাচ্ছে না। ডেমো টিকিট দিয়ে চালিয়ে যান।",
+        "en": "The AI reader is unavailable right now. Continue with a demo ticket instead.",
+    },
+    "err_generic": {
+        "bn": "টিকিটটি পড়া যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।",
+        "en": "Something went wrong reading your ticket. Please try again.",
+    },
+    "status_scheduled": {
+        "bn": "নির্ধারিত",
+        "en": "Scheduled",
+    },
+    "status_check_in_open": {
+        "bn": "চেক-ইন খোলা",
+        "en": "Check-in open",
+    },
+    "status_check_in_closed": {
+        "bn": "চেক-ইন বন্ধ",
+        "en": "Check-in closed",
+    },
+    "status_delayed": {
+        "bn": "বিলম্বিত",
+        "en": "Delayed",
+    },
+    "status_boarding": {
+        "bn": "বোর্ডিং চলছে",
+        "en": "Boarding",
+    },
+    "status_final_call": {
+        "bn": "ফাইনাল কল",
+        "en": "Final call",
+    },
+    "status_gate_closed": {
+        "bn": "গেট বন্ধ",
+        "en": "Gate closed",
+    },
+    "status_departed": {
+        "bn": "ছেড়ে গেছে",
+        "en": "Departed",
+    },
+    "status_cancelled": {
+        "bn": "বাতিল",
+        "en": "Cancelled",
+    },
+    "now_label": {
+        "bn": "এখন করুন",
+        "en": "Do this now",
+    },
+    "completed_label": {
+        "bn": "যাত্রা সম্পন্ন",
+        "en": "Journey complete",
+    },
+    "task_entered_title": {
+        "bn": "চেক-ইন কাউন্টারে যান",
+        "en": "Go to the check-in counter",
+    },
+    "task_entered_note": {
+        "bn": "টিকিট ও পাসপোর্ট নিয়ে আপনার কাউন্টারে লাইন ধরুন।",
+        "en": "Join the queue at your counter with your ticket and passport.",
+    },
+    "task_checkin_wait": {
+        "bn": "চেক-ইন এখনো শুরু হয়নি — খুললে আপনাকে জানানো হবে।",
+        "en": "Check-in has not opened yet — you'll be notified when it does.",
+    },
+    "task_immigration_title": {
+        "bn": "ডিপারচার ইমিগ্রেশনে যান",
+        "en": "Go to departure immigration",
+    },
+    "task_immigration_note": {
+        "bn": "পাসপোর্ট ও প্রস্থান কার্ড দেখিয়ে ইমিগ্রেশন সম্পন্ন করুন।",
+        "en": "Clear immigration with your passport and departure card.",
+    },
+    "task_security_title": {
+        "bn": "সিকিউরিটি চেক করুন",
+        "en": "Clear security screening",
+    },
+    "task_security_note": {
+        "bn": "হ্যান্ড ব্যাগ স্ক্যানারে দিন, নিষিদ্ধ জিনিস সঙ্গে নেবেন না।",
+        "en": "Send your hand luggage through the scanner; no prohibited items.",
+    },
+    "task_airside_title": {
+        "bn": "এয়ারসাইডে গিয়ে গেটের পথ ধরুন",
+        "en": "Proceed airside towards your gate",
+    },
+    "task_airside_note": {
+        "bn": "সাইন দেখে আপনার গেটের দিকে এগিয়ে যান।",
+        "en": "Follow the signs towards your gate.",
+    },
+    "task_gate_title": {
+        "bn": "বোর্ডিং গেটে যান",
+        "en": "Go to your boarding gate",
