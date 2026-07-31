@@ -1359,3 +1359,287 @@ body {
   background: color-mix(in srgb, var(--accent) 14%, transparent);
   color: var(--accent-ink);
 }
+
+.nav-item-active::after {
+  content: "";
+  position: absolute;
+  bottom: 0.28rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 9999px;
+  background: var(--beacon);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--beacon) 85%, transparent);
+}
+
+.dash-grid {
+  display: grid;
+  gap: 1.4rem;
+}
+
+@media (min-width: 1024px) {
+  .dash-grid {
+    grid-template-columns: 1.12fr 1fr;
+    gap: 2rem;
+  }
+}
+
+/* ---- the orb ---- */
+.assistant-stage .voice-mic-wrap {
+  animation: orb-wake 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes orb-wake {
+  from {
+    opacity: 0;
+    transform: scale(0.86);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.voice-mic-wrap {
+  width: 6.2rem;
+  height: 6.2rem;
+}
+
+.voice-mic-wrap::before {
+  content: "";
+  position: absolute;
+  inset: -0.7rem;
+  border-radius: 9999px;
+  background: conic-gradient(from 0deg, transparent 0deg 295deg, color-mix(in srgb, var(--beacon) 80%, transparent) 330deg, transparent 360deg);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px));
+  animation: orb-orbit 40s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes orb-orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.voice-mic {
+  position: relative;
+  overflow: hidden;
+  width: 5.6rem;
+  height: 5.6rem;
+  background: radial-gradient(circle at 32% 28%, var(--orb-main-1) 0%, var(--orb-main-2) 38%, var(--orb-main-3) 76%, var(--orb-main-4) 100%);
+  color: var(--orb-main-ink);
+  box-shadow:
+    0 0 36px -6px color-mix(in srgb, var(--glow-main) 60%, transparent),
+    0 0 90px -18px color-mix(in srgb, var(--glow-main) 50%, transparent),
+    inset 0 2px 8px rgba(255, 255, 255, 0.28),
+    inset 0 -10px 22px rgba(0, 0, 0, 0.4);
+  animation: orb-breathe 4.5s ease-in-out infinite;
+}
+
+@keyframes orb-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.035);
+  }
+}
+
+.voice-mic::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(115deg, transparent 32%, rgba(255, 255, 255, 0.3) 50%, transparent 68%);
+  transform: translateX(-130%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.is-thinking .voice-mic {
+  animation: none;
+  background: radial-gradient(circle at 32% 28%, var(--orb-dim-1) 0%, var(--orb-dim-2) 45%, var(--orb-dim-3) 100%);
+  color: var(--orb-dim-ink);
+  box-shadow:
+    0 0 26px -10px color-mix(in srgb, var(--glow-main) 30%, transparent),
+    inset 0 2px 8px rgba(255, 255, 255, 0.08);
+}
+
+.is-thinking .voice-mic::after {
+  opacity: 1;
+  animation: orb-shimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes orb-shimmer {
+  to {
+    transform: translateX(130%);
+  }
+}
+
+.is-listening .voice-mic {
+  animation: none;
+  background: radial-gradient(circle at 32% 28%, var(--orb-beacon-1) 0%, var(--orb-beacon-2) 42%, var(--orb-beacon-3) 78%, var(--orb-beacon-4) 100%);
+  color: var(--orb-beacon-ink);
+  box-shadow:
+    0 0 48px -4px color-mix(in srgb, var(--glow-beacon) 70%, transparent),
+    0 0 110px -18px color-mix(in srgb, var(--glow-beacon) 55%, transparent),
+    inset 0 2px 8px rgba(255, 255, 255, 0.35),
+    inset 0 -10px 22px rgba(0, 0, 0, 0.35);
+  transform: scale(1.05);
+}
+
+.is-speaking .voice-mic {
+  animation: none;
+  background: radial-gradient(circle at 32% 28%, var(--orb-bright-1) 0%, var(--orb-bright-2) 38%, var(--orb-bright-3) 78%, var(--orb-bright-4) 100%);
+  color: var(--orb-bright-ink);
+  box-shadow:
+    0 0 52px -4px color-mix(in srgb, var(--glow-main) 75%, transparent),
+    0 0 120px -18px color-mix(in srgb, var(--glow-main) 60%, transparent),
+    inset 0 2px 8px rgba(255, 255, 255, 0.4),
+    inset 0 -10px 22px rgba(0, 0, 0, 0.35);
+  transform: scale(1.05);
+}
+
+.voice-ring {
+  inset: 0.1rem;
+  border: 2px solid color-mix(in srgb, var(--beacon) 65%, transparent);
+  box-shadow: 0 0 34px -6px color-mix(in srgb, var(--beacon) 55%, transparent);
+}
+
+.voice-caption {
+  font-family: "Noto Sans Bengali", "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0;
+  line-height: 1.5;
+}
+
+.replay-btn {
+  border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: var(--accent-ink);
+}
+
+.replay-btn:active {
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.session-stop-btn {
+  border: 1px solid rgba(225, 29, 72, 0.45);
+  background: rgba(225, 29, 72, 0.12);
+  color: #fda4af;
+}
+
+.session-stop-btn:active {
+  background: rgba(225, 29, 72, 0.22);
+}
+
+.kiosk-idle-card {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 40px 90px -40px rgba(0, 0, 0, 0.6);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .assistant-stage .voice-mic-wrap,
+  .voice-mic,
+  .voice-mic-wrap::before,
+  .voice-mic::after,
+  .voice-bars span,
+  .is-listening .voice-ring-1,
+  .is-listening .voice-ring-2 {
+    animation: none !important;
+  }
+}
+
+/* ============================================================
+   Split Stage layout
+   ============================================================ */
+
+.stage-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 24rem;
+  padding: 3rem 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .stage-card {
+    min-height: 34rem;
+    padding: 3.5rem 2.5rem;
+  }
+}
+
+.voice-mic-wrap {
+  margin: 0 auto;
+}
+
+/* ============================================================
+   Phase 2 — component polish (Night Approach everywhere)
+   ============================================================ */
+
+.flight-card-btn {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.flight-card-btn:hover,
+.flight-card-btn:active {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+.place-row {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  color: var(--text);
+}
+
+.place-row:hover,
+.place-row:active {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.step-num {
+  border: 1px solid color-mix(in srgb, var(--accent) 42%, transparent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent-ink);
+}
+
+.step-row-line::before {
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.signage {
+  border: 2px solid color-mix(in srgb, var(--beacon) 60%, transparent);
+  background: linear-gradient(160deg, var(--surface), color-mix(in srgb, var(--base) 85%, transparent));
+  box-shadow: 0 16px 40px -20px color-mix(in srgb, var(--beacon) 45%, transparent);
+}
+
+.signage-plane,
+.signage-arrow {
+  color: var(--beacon);
+}
+
+.now-card {
+  border: 1px solid color-mix(in srgb, var(--beacon) 45%, transparent);
+  background: linear-gradient(165deg, color-mix(in srgb, var(--beacon) 13%, transparent), color-mix(in srgb, var(--accent) 5%, transparent) 55%, transparent);
+  box-shadow: 0 18px 45px -22px color-mix(in srgb, var(--beacon) 40%, transparent);
+}
+
+.now-card-done {
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  background: linear-gradient(165deg, color-mix(in srgb, var(--accent) 13%, transparent), transparent);
+  box-shadow: 0 18px 45px -22px color-mix(in srgb, var(--accent) 40%, transparent);
+}
