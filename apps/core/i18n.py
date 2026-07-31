@@ -437,3 +437,102 @@ STRINGS = {
     "task_gate_title": {
         "bn": "বোর্ডিং গেটে যান",
         "en": "Go to your boarding gate",
+    },
+    "task_gate_note": {
+        "bn": "গেট নম্বর নিশ্চিত করে কাছেই অপেক্ষা করুন।",
+        "en": "Confirm your gate number and wait nearby.",
+    },
+    "task_gate_pending": {
+        "bn": "গেট এখনো ঘোষণা হয়নি — ঘোষণা হলেই জানানো হবে।",
+        "en": "The gate has not been announced yet — you'll be notified.",
+    },
+    "task_departed_title": {
+        "bn": "ফ্লাইট ছেড়ে গেছে",
+        "en": "The flight has departed",
+    },
+    "task_departed_note": {
+        "bn": "আপনার ফ্লাইট ইতিমধ্যে ছেড়ে গেছে। ইনফরমেশন ডেস্ক বা এয়ারলাইনের সহায়তা কাউন্টারে যোগাযোগ করুন।",
+        "en": "Your flight has already departed. Please contact the information desk or the airline assistance counter.",
+    },
+    "task_cancelled_title": {
+        "bn": "ফ্লাইট বাতিল হয়েছে",
+        "en": "Flight cancelled",
+    },
+    "task_cancelled_note": {
+        "bn": "এই ফ্লাইটটি বাতিল হয়েছে। এয়ারলাইনের সহায়তা কাউন্টারে যোগাযোগ করুন।",
+        "en": "This flight has been cancelled. Please contact the airline assistance counter.",
+    },
+    "task_gate_wait_title": {
+        "bn": "গেটে অপেক্ষা করুন",
+        "en": "Wait at the gate",
+    },
+    "task_gate_wait_note": {
+        "bn": "বোর্ডিং শুরু হলে আপনাকে জানানো হবে।",
+        "en": "You will be notified when boarding starts.",
+    },
+    "task_boarding_title": {
+        "bn": "বোর্ডিং শুরু — এখনই গেটে যান!",
+        "en": "Boarding has started — go to the gate now!",
+    },
+    "task_boarding_note": {
+        "bn": "পাসপোর্ট ও বোর্ডিং পাস হাতে নিয়ে গেটে প্রবেশ করুন।",
+        "en": "Enter the gate with your passport and boarding pass ready.",
+    },
+    "task_boarded_title": {
+        "bn": "বোর্ডিং সম্পন্ন — শুভ যাত্রা!",
+        "en": "Boarded — have a great flight!",
+    },
+    "task_boarded_note": {
+        "bn": "আপনি প্লেনে উঠে গেছেন। উড়ন্ত যাত্রায় শুভকামনা।",
+        "en": "You're on board. Safe travels.",
+    },
+    "done_btn": {
+        "bn": "সম্পন্ন — পরের ধাপ",
+        "en": "Done — next step",
+    },
+    "undo_btn": {
+        "bn": "ধাপ পিছিয়ে যান",
+        "en": "Go back a step",
+    },
+    "wait_chip": {
+        "bn": "অপেক্ষা করুন",
+        "en": "Wait",
+    },
+    "timeline_title": {
+        "bn": "যাত্রার ধাপ",
+        "en": "Journey steps",
+    },
+    "step_airport_entry": {
+        "bn": "এয়ারপোর্টে প্রবেশ",
+        "en": "Airport entry",
+    },
+    "step_checkin": {
+        "bn": "চেক-ইন",
+        "en": "Check-in",
+    },
+    "step_immigration": {
+        "bn": "ইমিগ্রেশন",
+        "en": "Immigration",
+    },
+    "step_security": {
+        "bn": "সিকিউরিটি",
+        "en": "Security",
+    },
+    "step_gate": {
+        "bn": "বোর্ডিং গেট",
+        "en": "Boarding gate",
+    },
+    "step_boarding": {
+        "bn": "বোর্ডিং",
+        "en": "Boarding",
+    },
+    "boarding_starts_label": {
+        "bn": "বোর্ডিং শুরু",
+        "en": "Boarding starts",
+    },
+    "leave_for_gate_label": {
+        "bn": "গেটে রওনা",
+        "en": "Leave for gate",
+    },
+    "walk_note": {
+        "bn": "গেটে হাঁটা লাগবে প্রায়",
