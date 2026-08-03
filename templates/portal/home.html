@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load ui_extras %}
+{% block title %}{{ t.app_name }} · {{ t.airport_name }}{% endblock %}
+{% block body_class %}page-wide{% endblock %}
+{% block content %}
+<div class="dash-grid">
+  <section class="companion-band">
+    <iframe class="assistant-frame" src="{% url 'assistant' %}" title="{{ t.ask_ai }}"></iframe>
+  </section>
+  <section class="journey-col">
+    <div class="content-panel" id="content-panel">
+      {% if view == 'ticket' %}
+      {% include "partials/_panel_ticket.html" %}
+      {% elif view == 'journey' %}
+      {% include "partials/_panel_journey.html" %}
+      {% elif view == 'map' %}
+      {% include "partials/_panel_map.html" %}
+      {% elif view == 'navigate' %}
+      {% include "partials/_panel_navigate.html" %}
+      {% elif view == 'lost' %}
+      {% include "partials/_panel_lost.html" %}
+      {% elif view == 'arrival' %}
+      {% include "partials/_panel_arrival.html" %}
+      {% elif view == 'notifications' %}
+      {% include "partials/_panel_notifications.html" %}
+      {% endif %}
+    </div>
+  </section>
+</div>
+{% endblock %}
