@@ -1,0 +1,22 @@
+<nav class="tiles-dock" aria-label="{{ t.journey }} · {{ t.quick_map_tile }} · {{ t.quick_arrival_tile }} · {{ t.notif_title }}">
+  <div class="tiles-dock-inner">
+    <a href="{% url 'home' %}?view=journey" hx-get="{% url 'home' %}?view=journey" hx-target="#content-panel" hx-swap="innerHTML" hx-push-url="true"
+       class="quick-tile dock-tile {% if request.GET.view == 'journey' or not request.GET.view and journey %}quick-tile-active{% endif %}">
+      <span class="quick-tile-icon">
+        <svg viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5" aria-hidden="true">
+          <path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z"/>
+        </svg>
+      </span>
+      <span class="text-xs font-medium leading-tight">{{ t.journey }}</span>
+      <span class="text-[10px] leading-tight text-slate-500">{{ t.journey_card_title }}</span>
+    </a>
+    <a href="{% url 'home' %}?view=map" hx-get="{% url 'home' %}?view=map" hx-target="#content-panel" hx-swap="innerHTML" hx-push-url="true" class="quick-tile dock-tile {% if request.GET.view == 'map' %}quick-tile-active{% endif %}">
+      <span class="quick-tile-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z"/>
+        </svg>
+      </span>
+      <span class="text-xs font-medium leading-tight">{{ t.quick_map_tile }}</span>
+      <span class="text-[10px] leading-tight text-slate-500">{{ t.quick_map_desc }}</span>
+    </a>
+    <a href="{% url 'home' %}?view=arrival" hx-get="{% url 'home' %}?view=arrival" hx-target="#content-panel" hx-swap="innerHTML" hx-push-url="true" class="quick-tile dock-tile {% if request.GET.view == 'arrival' %}quick-tile-active{% endif %}">
