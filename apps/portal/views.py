@@ -30,3 +30,22 @@ def journey_panel_context(journey):
         "walk_minutes": engine.WALK_TO_GATE_MINUTES,
         "nav_target": action.get("nav_target") or STAGE_NAV_TARGETS.get(journey.stage),
     }
+
+
+def panel_context(request, journey, view):
+    context = {"journey": journey}
+    if view == "journey":
+        context.update(journey_panel_context(journey))
+    elif view == "ticket":
+        context.update(ticket_context(request))
+    elif view == "map":
+        context.update(map_context(request))
+    elif view == "navigate":
+        context.update(navigate_context(request, journey))
+    elif view == "lost":
+        context.update(lost_context(request, journey))
+    elif view == "arrival":
+        context.update(arrival_context(request))
+    elif view == "notifications":
+        context.update(notifications_context(request))
+    return context
