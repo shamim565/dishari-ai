@@ -64,3 +64,20 @@
       <span x-show="!demoOpen">{{ t.demo_tickets_btn }}</span>
       <span x-show="demoOpen" x-cloak>{{ t.demo_tickets_close_btn }}</span>
     </button>
+
+    <div x-show="demoOpen" x-cloak class="demo-modal" role="dialog" aria-modal="true"
+         aria-label="{{ t.demo_picker_title }}">
+      <div class="demo-modal-backdrop" @click="demoOpen = false"></div>
+      <div class="demo-modal-card">
+        <div>
+          <p class="text-sm font-semibold">{{ t.demo_picker_title }}</p>
+          <p class="mt-1 text-xs leading-relaxed text-slate-400">{{ t.demo_picker_sub }}</p>
+        </div>
+
+        <div class="demo-modal-list">
+          <div class="grid gap-3 sm:grid-cols-2">
+            {% for flight in flights %}
+            <form method="post" action="{% url 'ticket_demo_pick' flight.pk %}" hx-post="{% url 'ticket_demo_pick' flight.pk %}" hx-target="#content-panel" hx-swap="innerHTML">
+              {% csrf_token %}
+              <button type="submit" class="flight-card-btn">
+                <div class="flex items-center justify-between gap-3">
