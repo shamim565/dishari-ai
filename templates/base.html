@@ -81,3 +81,21 @@
       {% block content %}{% endblock %}
     </main>
     {% include "partials/_tiles_dock.html" %}
+  </div>
+  {% endblock %}
+  <div id="kiosk-idle-overlay" class="kiosk-idle-overlay" hidden>
+    <div class="kiosk-idle-card">
+      <p class="text-lg font-semibold">{{ t.kiosk_idle_title }}</p>
+      <p class="mt-2 text-sm text-slate-400">
+        {{ t.kiosk_idle_note }} <span id="kiosk-idle-count" class="font-semibold text-amber-300"></span> {{ t.kiosk_seconds }}
+      </p>
+      <button type="button" id="kiosk-idle-continue"
+              class="mt-5 w-full rounded-full bg-amber-400 px-5 py-2.5 text-sm font-semibold text-slate-950">
+        {{ t.kiosk_still_here_btn }}
+      </button>
+    </div>
+  </div>
+  <script defer src="{% static 'js/kiosk.js' %}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>
