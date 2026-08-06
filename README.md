@@ -131,3 +131,36 @@ OPENAI_API_KEY=...
 AZURE_SPEECH_KEY=...           # free tier: bn-BD TTS + STT (optional but recommended)
 AZURE_SPEECH_REGION=southeastasia
 ```
+
+No keys at all → demo mode: rule-based bilingual replies built from the journey engine still cover the whole golden path.
+
+## Demo checklist — Sprint 6 (Live Events + Notifications + Operator Panel)
+
+1. Kiosk: journey active for **BG147** on the dashboard
+2. Operator laptop: open `http://localhost:8000/ops/` → PIN `1234` (set by `OPS_PIN`)
+3. Operator taps **Check-in open** on BG147 → within ~10 s the kiosk shows a toast and **speaks** "চেক-ইন শুরু হয়েছে…"; the flight status chip updates
+4. Operator **Gate change** with gate `12` → **urgent red alert** + voice: "গুরুত্বপূর্ণ: আপনার বোর্ডিং গেট পরিবর্তন হয়ে 12 হয়েছে।"; dashboard strip shows Gate 12 and **পথ দেখান** now routes to Gate 12
+5. Operator **Delay flight +1 hour** → new estimated departure; countdowns and "effective departure" update everywhere
+6. Operator **Boarding** → the GATE-stage task switches to "বোর্ডিং শুরু — এখনই গেটে যান!"
+7. Bell icon in the app header → notification history, per-message replay button, and a **voice alerts toggle** (urgent alerts always speak)
+8. Operator **Reset demo data** → fresh flights + layout, all sessions cleared (demo redo)
+
+### The full golden path (all sprints)
+
+Tap mic → spoken greeting → continuous voice conversation → ticket upload from the phone (or demo pick) → kiosk timeline → navigation with QR markers → operator triggers gate change → urgent spoken alert → boarding → boarded. Everything in Bangla, all facts from the database, never invented by the AI.
+
+## Demo checklist — Sprint 7 (Transit & Arrival + Safety Nets + Demo Kit)
+
+1. Home quick tile **ট্রানজিট ও আগমন** (or after boarding, the dashboard's **এরপর: ট্রানজিট ও আগমন গাইড**) → two guided flows:
+   - **Transit**: Transfers sign → transfer desk → transit security → next gate → tight-connection advice
+   - **Arrival at Dhaka**: immigration → baggage claim → customs (red/green) → services → exit
+2. Say **"আমার পাসপোর্ট হারিয়ে গেছে"** (or "I feel sick", "I lost my child") → the assistant routes you **by voice** to the police help desk / medical centre / information desk — works even without any LLM key, never routed through the AI
+3. Ask something the assistant can't parse → it honestly hands off **to the information desk** by voice
+4. Ask **"কানেক্টিং ফ্লাইট আছে"** → transit guidance spoken
+5. Operator panel → **Passenger intelligence**: top question topics, বাংলা/English split, question count — the airport learns where passengers struggle
+6. `uv run manage.py demo_setup` prepares the whole demo in one command (flights, layout, tickets, markers, icons)
+7. `OPS_PIN` (default `1234`) protects the operator panel; demo reset clears everything for the next run
+
+## Kiosk operation (shared device)
+
+The app **is** the kiosk — it always runs in kiosk mode:
