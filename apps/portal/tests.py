@@ -43,3 +43,19 @@ class AssistantPageTests(TestCase):
         self.assertContains(response, "voice-mic")
         self.assertContains(response, "chat-config")
         self.assertContains(response, "মাইকে ট্যাপ করুন")
+
+    def test_assistant_text_free(self):
+        response = Client().get(reverse("assistant"))
+        self.assertNotContains(response, "chat-history")
+        self.assertNotContains(response, 'class="msg')
+
+
+class AssistantVoiceModeTests(TestCase):
+    def test_tts_query_forces_pipeline(self):
+        response = Client().get(reverse("assistant") + "?voice=tts")
+        self.assertContains(response, 'window.VOICE_MODE = "tts"')
+
+    def test_live_query_selects_live_mode(self):
+        response = Client().get(reverse("assistant") + "?voice=live")
+        self.assertContains(response, 'window.VOICE_MODE = "live"')
+        self.assertContains(response, "live-config")
