@@ -12,3 +12,9 @@ def i18n(request):
         "lang": lang,
         "other_lang": "en" if lang == "bn" else "bn",
     }
+
+
+def kiosk(request):
+    return {
+        "kiosk_idle_seconds": settings.KIOSK_IDLE_SECONDS,
+    }
