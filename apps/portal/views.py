@@ -49,3 +49,26 @@ def panel_context(request, journey, view):
     elif view == "notifications":
         context.update(notifications_context(request))
     return context
+
+
+def _voice_mode(request):
+    mode = (request.GET.get("voice") or "live").strip().lower()
+    return "tts" if mode == "tts" else "live"
+
+
+@xframe_options_exempt
+def assistant(request):
+    mode = _voice_mode(request)
+    live_ok = live_api.live_configured()
+    if mode == "live" and not live_ok:
+        mode = "tts"
+    context = chat_context(request)
+    context.update(
+        {
+            "voice_mode": mode,
+            "live_available": live_ok,
+            "live_model": live_api.live_model(),
+            "live_fallback_notice": request.GET.get("fallback") == "1",
+        }
+    )
+    return render(request, "assistant/shell.html", context)
