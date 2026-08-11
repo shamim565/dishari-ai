@@ -74,3 +74,31 @@ def _build_steps(path, start_code):
         )
         current = destination.code
     return steps
+
+
+def find_route(from_loc, to_loc):
+    if from_loc is None or to_loc is None:
+        return None
+    refresh_location_index()
+    if from_loc.code == to_loc.code:
+        return RouteResult(from_location=from_loc, to_location=to_loc)
+
+    adjacency = _adjacency()
+    queue = deque([(from_loc.code, [])])
+    visited = {from_loc.code}
+    while queue:
+        node, path = queue.popleft()
+        for next_code, segment in adjacency[node]:
+            if next_code in visited:
+                continue
+            new_path = path + [segment]
+            if next_code == to_loc.code:
+                return RouteResult(
+                    from_location=from_loc,
+                    to_location=to_loc,
+                    steps=_build_steps(new_path, from_loc.code),
+                    distance_m=sum(s.distance_m for s in new_path),
+                )
+            visited.add(next_code)
+            queue.append((next_code, new_path))
+    return None
