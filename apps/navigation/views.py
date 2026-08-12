@@ -94,3 +94,56 @@ def navigate_context(request, journey):
         "notice": notice,
         "assumed_from_entry": assumed_from_entry,
     }
+
+
+def lost_context(request, journey):
+    current = get_current_location(request)
+    target = None
+    route = None
+    step_index = 0
+    if journey:
+        target, _notice = resolve_target(stage_nav_target(journey), journey)
+        origin = current or _by_code("ENTRY")
+        route = find_route(origin, target)
+    if route and route.steps:
+        try:
+            step_index = max(0, min(int(request.GET.get("step", 0)), len(route.steps)))
+        except ValueError:
+            step_index = 0
+    step = route.steps[step_index] if route and step_index < len(route.steps) else None
+    step_location = None
+    if step:
+        refresh_location_index()
+        step_location = LOCATION_INDEX.get(step.to_code)
+    arrived = bool(route and route.steps and step_index >= len(route.steps))
+    return {
+        "current": current,
+        "route": route,
+        "step": step,
+        "step_location": step_location,
+        "step_index": step_index,
+        "arrived": arrived,
+        "locations": site_locations(),
+    }
+
+
+def airport_map(request):
+    return redirect(f"{reverse('home')}?view=map")
+
+
+def navigate(request):
+    to_param = request.GET.get("to", "")
+    return redirect(f"{reverse('home')}?view=navigate&to={to_param}")
+
+
+def scan_marker(request, code):
+    location = Location.objects.filter(qr_code__iexact=code).first()
+    if not location:
+        return redirect(f"{reverse('home')}?view=map&unknown={code}")
+    request.session[LOCATION_KEY] = location.code
+    return redirect(f"{reverse('home')}?view=map&scanned={location.code}")
+
+
+def lost(request):
+    step_param = request.GET.get("step", "")
+    return redirect(f"{reverse('home')}?view=lost&step={step_param}")
