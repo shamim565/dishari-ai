@@ -1,0 +1,39 @@
+{% load ui_extras %}
+<div class="space-y-4">
+  <div>
+    <h1 class="text-xl font-semibold">{{ t.quick_map_tile }}</h1>
+    {% if current %}
+    <p class="mt-1.5 flex items-center gap-2 text-sm text-slate-300">
+      <span class="status-dot" aria-hidden="true"></span>
+      {{ t.you_are_here }}: <span class="font-semibold">{{ current|bn_name:lang }}</span>
+    </p>
+    {% endif %}
+  </div>
+
+  {% if scanned_location %}
+  <div class="info-banner">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+      <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/>
+    </svg>
+    <span>{{ t.location_updated }}: {{ scanned_location|bn_name:lang }}</span>
+  </div>
+  {% endif %}
+
+  {% if unknown %}
+  <div class="error-banner">
+    <span>{{ t.unknown_qr }}</span>
+  </div>
+  {% endif %}
+
+  {% if not current %}
+  <div class="info-banner">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+      <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/>
+    </svg>
+    <span>{{ t.scan_qr_hint }}</span>
+  </div>
+  {% endif %}
+
+  {% include "partials/_terminal_map.html" %}
