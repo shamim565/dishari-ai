@@ -1,0 +1,50 @@
+{% load ui_extras %}
+<svg viewBox="0 0 1000 560" class="terminal-map" role="img" aria-label="{{ t.quick_map_tile }}">
+  <rect class="tm-outline" x="20" y="20" width="960" height="520" rx="18"/>
+  <rect class="tm-zone" x="34" y="34" width="460" height="492" rx="12"/>
+  <rect class="tm-zone tm-zone-air" x="740" y="34" width="226" height="492" rx="12"/>
+  <rect class="tm-door" x="16" y="270" width="10" height="60" rx="4"/>
+
+  <text class="tm-zone-label" x="54" y="64">{{ t.zone_landside }}</text>
+  <text class="tm-zone-label" x="756" y="64">{{ t.zone_airside }}</text>
+
+  <g>
+    <rect class="tm-block" x="110" y="80" width="320" height="92" rx="10"/>
+    <line class="tm-counter" x1="128" y1="148" x2="412" y2="148"/>
+    <text class="tm-block-label" x="270" y="122" text-anchor="middle">A</text>
+
+    <rect class="tm-block" x="110" y="254" width="320" height="92" rx="10"/>
+    <line class="tm-counter" x1="128" y1="322" x2="412" y2="322"/>
+    <text class="tm-block-label" x="270" y="296" text-anchor="middle">B</text>
+
+    <rect class="tm-block" x="110" y="428" width="320" height="92" rx="10"/>
+    <line class="tm-counter" x1="128" y1="496" x2="412" y2="496"/>
+    <text class="tm-block-label" x="270" y="470" text-anchor="middle">C</text>
+  </g>
+
+  <rect class="tm-imm" x="560" y="150" width="160" height="140" rx="10"/>
+  <text class="tm-zone-sub" x="640" y="224" text-anchor="middle">{{ t.step_immigration }}</text>
+
+  <rect class="tm-sec" x="560" y="320" width="160" height="120" rx="10"/>
+  <text class="tm-zone-sub" x="640" y="384" text-anchor="middle">{{ t.step_security }}</text>
+
+  {% if route %}<polyline class="tm-route" points="{{ route.points }}"/>{% endif %}
+
+  {% for loc in locations %}
+  <g class="poi poi-{{ loc.kind }}">
+    {% if current and current.code == loc.code %}
+    <circle class="tm-you-pulse" cx="{{ loc.x }}" cy="{{ loc.y }}" r="15"/>
+    <circle class="tm-you" cx="{{ loc.x }}" cy="{{ loc.y }}" r="7"/>
+    {% elif target and target.code == loc.code %}
+    <circle class="tm-target" cx="{{ loc.x }}" cy="{{ loc.y }}" r="12"/>
+    <circle class="tm-target-core" cx="{{ loc.x }}" cy="{{ loc.y }}" r="5"/>
+    {% else %}
+    <circle class="tm-dot" cx="{{ loc.x }}" cy="{{ loc.y }}" r="6"/>
+    {% endif %}
+    {% if loc.kind == 'gate' %}
+    <text class="tm-label tm-label-gate" x="{{ loc.x|add:'-16' }}" y="{{ loc.y|add:'5' }}" text-anchor="end">{{ loc.map_label }}</text>
+    {% else %}
+    <text class="tm-label" x="{{ loc.x }}" y="{{ loc.y|add:'26' }}" text-anchor="middle">{{ loc.map_label }}</text>
+    {% endif %}
+  </g>
+  {% endfor %}
