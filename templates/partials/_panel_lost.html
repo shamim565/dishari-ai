@@ -1,0 +1,45 @@
+{% load ui_extras %}
+<div class="space-y-4">
+  <div class="text-center">
+    <h1 class="text-xl font-semibold">{{ t.lost_title }}</h1>
+    <p class="mx-auto mt-1.5 max-w-xs text-sm text-slate-400">{{ t.lost_intro }}</p>
+  </div>
+
+  {% if arrived %}
+  <div class="now-card now-card-done">
+    <p class="now-label">{{ t.completed_label }}</p>
+    <h2 class="mt-1.5 text-lg font-semibold">{{ t.lost_arrived }}</h2>
+    {% if target %}<p class="mt-1.5 text-sm text-slate-300">{{ target|bn_name:lang }}</p>{% endif %}
+  </div>
+  <a href="{% url 'home' %}" hx-get="{% url 'home' %}" hx-target="#content-panel" hx-swap="innerHTML" hx-push-url="true" class="btn-primary">{{ t.open_journey_btn }}</a>
+  {% elif step %}
+  <div class="flex items-center justify-between">
+    <span class="chip chip-warn">{{ t.step_label }} {{ step_index|add:1 }} / {{ route.steps|length }}</span>
+    {% if target %}<span class="chip chip-neutral">{{ t.destination_label }} {{ target.map_label }}</span>{% endif %}
+  </div>
+
+  <section class="now-card">
+    <p class="text-base font-medium leading-relaxed text-slate-100">
+      {% if lang == 'bn' %}{{ step.instruction_bn }}{% else %}{{ step.instruction_en }}{% endif %}
+    </p>
+    <p class="mt-2 text-[11px] text-slate-500">{{ step.distance_m }} {{ t.dist_m }}</p>
+  </section>
+
+  {% if step_location %}
+  <section>
+    <h2 class="text-[11px] uppercase tracking-widest text-slate-500">{{ t.look_for_sign }}</h2>
+    <div class="mt-2.5">
+      {% with location=step_location %}{% include "partials/_signage.html" %}{% endwith %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if request.GET.nf %}
+  <div class="info-banner"><span>{{ t.lost_fallback }}</span></div>
+  <a href="{% url 'home' %}?view=navigate&amp;to=INFO" hx-get="{% url 'home' %}?view=navigate&amp;to=INFO" hx-target="#content-panel" hx-swap="innerHTML" hx-push-url="true" class="btn-secondary w-full">{{ t.navigate_btn }} → {{ t.info_desk_label }}</a>
+  {% endif %}
+
+  <div class="grid grid-cols-2 gap-3">
+    <a href="{% url 'home' %}?view=lost&amp;step={{ step_index|add:1 }}" hx-get="{% url 'home' %}?view=lost&amp;step={{ step_index|add:1 }}" hx-target="#content-panel" hx-swap="innerHTML" hx-push-url="true" class="btn-primary">{{ t.found_btn }}</a>
+    <a href="{% url 'home' %}?view=lost&amp;step={{ step_index }}&amp;nf=1" hx-get="{% url 'home' %}?view=lost&amp;step={{ step_index }}&amp;nf=1" hx-target="#content-panel" hx-swap="innerHTML" hx-push-url="true" class="btn-secondary">{{ t.not_found_btn }}</a>
+  </div>
