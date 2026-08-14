@@ -79,3 +79,55 @@ class NavigationFlowTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertIn("view=map", response["Location"])
         self.assertIn("unknown=ZZZ", response["Location"])
+
+    def test_navigate_from_entry_without_position(self):
+        client = self.app_client()
+        response = client.get(reverse("home") + "?view=navigate&to=IMM")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "showing the route from the entrance")
+        self.assertContains(response, "Walk straight through the entrance")
+        self.assertContains(response, "Departure immigration")
+
+    def test_navigate_checkin_target_uses_flight_block(self):
+        client = self.app_client()
+        flight = Flight.objects.get(number="BG147")
+        client.post(reverse("ticket_demo_pick", args=[flight.pk]))
+        response = client.get(reverse("home") + "?view=navigate&to=checkin")
+        self.assertContains(response, "Check-in Block A")
+        self.assertContains(response, "Block A")
+
+    def test_navigate_gate_pending_notice(self):
+        client = self.app_client()
+        flight = Flight.objects.get(number="BG147")
+        client.post(reverse("ticket_demo_pick", args=[flight.pk]))
+        response = client.get(reverse("home") + "?view=navigate&to=gate")
+        self.assertContains(response, "gate has not been announced")
+
+    def test_navigate_gate_with_assigned_gate(self):
+        client = self.app_client()
+        flight = Flight.objects.get(number="EK585")
+        client.post(reverse("ticket_demo_pick", args=[flight.pk]))
+        response = client.get(reverse("home") + "?view=navigate&to=gate")
+        self.assertContains(response, "Gate 8")
+
+    def test_lost_without_position_shows_hint(self):
+        client = self.app_client()
+        response = client.get(reverse("home") + "?view=lost")
+        self.assertContains(response, "Scan a column or block QR code")
+
+    def test_lost_with_position_shows_first_step(self):
+        client = self.app_client()
+        flight = Flight.objects.get(number="BG147")
+        client.post(reverse("ticket_demo_pick", args=[flight.pk]))
+        client.get(reverse("scan_marker", args=["A01"]))
+        response = client.get(reverse("home") + "?view=lost")
+        self.assertContains(response, "Step 1 /")
+        response = client.get(reverse("home") + "?view=lost&step=99")
+        self.assertContains(response, "You have arrived!")
+
+    def test_dashboard_links_to_checkin_route(self):
+        client = self.app_client()
+        flight = Flight.objects.get(number="BG147")
+        client.post(reverse("ticket_demo_pick", args=[flight.pk]))
+        response = client.get(reverse("home"))
+        self.assertContains(response, "/?view=navigate")
