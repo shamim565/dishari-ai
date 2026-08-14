@@ -536,3 +536,104 @@ STRINGS = {
     },
     "walk_note": {
         "bn": "গেটে হাঁটা লাগবে প্রায়",
+        "en": "About",
+    },
+    "walk_note_suffix": {
+        "bn": "মিনিট",
+        "en": "min walk to the gate",
+    },
+    "dur_now": {
+        "bn": "এখনই",
+        "en": "now",
+    },
+    "dur_h": {
+        "bn": "ঘ",
+        "en": "h",
+    },
+    "dur_m": {
+        "bn": "মি",
+        "en": "m",
+    },
+    "dur_ago": {
+        "bn": "আগে",
+        "en": "ago",
+    },
+    "zone_landside": {
+        "bn": "চেক-ইন হল (ল্যান্ডসাইড)",
+        "en": "Check-in hall (landside)",
+    },
+    "zone_airside": {
+        "bn": "এয়ারসাইড",
+        "en": "Airside",
+    },
+    "you_are_here": {
+        "bn": "আপনি এখানে",
+        "en": "You are here",
+    },
+    "scan_qr_hint": {
+        "bn": "কলাম বা ব্লকের QR কোড স্ক্যান করলে আপনার অবস্থান জানা যাবে।",
+        "en": "Scan a column or block QR code to set your position.",
+    },
+    "destination_label": {
+        "bn": "গন্তব্য",
+        "en": "Destination",
+    },
+    "navigate_title": {
+        "bn": "পথনির্দেশ",
+        "en": "Directions",
+    },
+    "navigate_btn": {
+        "bn": "পথ দেখান",
+        "en": "Show route",
+    },
+    "dist_m": {
+        "bn": "মিটার",
+        "en": "m",
+    },
+    "step_label": {
+        "bn": "ধাপ",
+        "en": "Step",
+    },
+    "route_from_entry_note": {
+        "bn": "আপনার অবস্থান এখনো জানা নেই — প্রবেশপথ থেকে পথ দেখানো হচ্ছে।",
+        "en": "Your position is not known yet — showing the route from the entrance.",
+    },
+    "no_route": {
+        "bn": "এই মুহূর্তে এই পথের তথ্য নেই।",
+        "en": "No route information is available right now.",
+    },
+    "location_updated": {
+        "bn": "আপনার অবস্থান আপডেট হয়েছে",
+        "en": "Your location has been updated",
+    },
+    "scan_position_label": {
+        "bn": "স্ক্যান করা QR",
+        "en": "Scanned QR",
+    },
+    "map_all_places": {
+        "bn": "সব স্থান",
+        "en": "All places",
+    },
+    "lost_btn": {
+        "bn": "আমি পথ হারিয়েছি",
+        "en": "I am lost",
+    },
+    "lost_title": {
+        "bn": "চিন্তা করবেন না",
+        "en": "Don't worry",
+    },
+    "lost_intro": {
+        "bn": "এক ধাপে একটাই কাজ — আমি পথ দেখাব।",
+        "en": "One step at a time — I will guide you.",
+    },
+    "look_for_sign": {
+        "bn": "এই সাইনটি খুঁজুন",
+        "en": "Look for this sign",
+    },
+    "found_btn": {
+        "bn": "হ্যাঁ, পেয়েছি",
+        "en": "Yes, found it",
+    },
+    "not_found_btn": {
+        "bn": "না, পাইনি",
+        "en": "No, can't find it",
