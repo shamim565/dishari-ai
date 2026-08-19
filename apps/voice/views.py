@@ -1,0 +1,46 @@
+import os
+
+from django.http import HttpResponse, JsonResponse
+from django.views.decorators.http import require_GET, require_POST
+
+from apps.core.i18n import DEFAULT_LANG
+from apps.journeys.services import get_active_journey
+from apps.voice import azure, gemini, live
+
+MAX_TTS_CHARS = 600
+MAX_STT_BYTES = 4 * 1024 * 1024
+
+
+def _lang(request):
+    source = request.POST.get("lang") or request.session.get("lang", DEFAULT_LANG)
+    return source if source in ("bn", "en") else DEFAULT_LANG
+
+
+def tts_provider():
+    return (os.getenv("TTS_PROVIDER") or "gemini").strip().lower()
+
+
+def tts_status(request):
+    return JsonResponse(
+        {
+            "available": gemini.gemini_configured() or azure.azure_configured(),
+            "provider": tts_provider(),
+            "voices": {
+                "gemini": {"bn": gemini.tts_voice("bn"), "en": gemini.tts_voice("en")},
+                "azure": azure.AZURE_VOICES,
+            },
+        }
+    )
+
+
+@require_POST
+def tts(request):
+    text = (request.POST.get("text") or "").strip()[:MAX_TTS_CHARS]
+    if not text:
+        return JsonResponse({"detail": "empty"}, status=400)
+    lang = _lang(request)
+
+    if tts_provider() == "gemini":
+        attempts = [("gemini", gemini), ("azure", azure)]
+    else:
+        attempts = [("azure", azure), ("gemini", gemini)]
