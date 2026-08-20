@@ -1,0 +1,39 @@
+{% load static %}
+<!doctype html>
+<html lang="{{ lang }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="{% static 'vendor/tailwind.js' %}"></script>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <script src="{% static 'js/voice.js' %}"></script>
+  <script defer src="{% static 'vendor/alpine.min.js' %}"></script>
+</head>
+<body class="assistant-shell">
+  {% include "partials/_voice_assistant.html" %}
+  <script id="chat-config" type="application/json">
+  {
+    "sendUrl": "{% url 'chat_send' %}",
+    "ttsUrl": "{% url 'voice_tts' %}",
+    "sttUrl": "{% url 'voice_stt' %}",
+    "csrf": "{{ csrf_token }}",
+    "lang": "{{ lang }}",
+    "sttLang": "{{ stt_lang }}",
+    "errorText": "{{ t.chat_error|escapejs }}",
+    "voiceHttpsMsg": "{{ t.chat_voice_needs_https|escapejs }}",
+    "voiceSetupMsg": "{{ t.chat_voice_unsupported|escapejs }}",
+    "fallbackNotice": "{% if live_fallback_notice %}{{ t.voice_live_fallback|escapejs }}{% endif %}",
+    "labels": {
+      "tapToSpeak": "{{ t.voice_tap_to_speak|escapejs }}",
+      "listening": "{{ t.chat_listening|escapejs }}",
+      "thinking": "{{ t.voice_thinking|escapejs }}",
+      "speaking": "{{ t.voice_speaking|escapejs }}",
+      "stopHint": "{{ t.voice_stop_hint|escapejs }}",
+      "start": "{{ t.voice_start|escapejs }}",
+      "end": "{{ t.voice_end|escapejs }}",
+      "pauseHint": "{{ t.voice_pause_hint|escapejs }}",
+      "paused": "{{ t.voice_paused|escapejs }}",
+      "noSpeech": "{{ t.voice_no_speech|escapejs }}",
