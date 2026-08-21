@@ -143,3 +143,101 @@ function chatApp() {
       }
       this.startListening(false);
     },
+
+    startSession() {
+      if (!this.canSession) {
+        this.startListening(false);
+        return;
+      }
+      chatVlog("session start");
+      this.sessionToken++;
+      this.sessionActive = true;
+      this.paused = false;
+      this.silentStrikes = 0;
+      this.voiceMessage = "";
+      const token = ++this.speakToken;
+      const greeting = this.labels.sessionGreeting || "";
+      const begin = () => {
+        if (token !== this.speakToken) return;
+        if (!this.sessionActive) return;
+        this.startListening(true);
+      };
+      if (greeting && typeof VoiceIO !== "undefined") {
+        this.phase = "speaking";
+        VoiceIO.speak(greeting, this.config.lang, this.config.ttsUrl, this.config.csrf, begin);
+      } else {
+        begin();
+      }
+    },
+
+    endSession() {
+      chatVlog("session end");
+      this.sessionToken++;
+      this.sessionActive = false;
+      this.paused = false;
+      this.silentStrikes = 0;
+      this.clearTimers();
+      this.speakToken++;
+      if (typeof VoiceIO !== "undefined") VoiceIO.cancelSpeaking();
+      if (this.recognition && this.recognition.stop) {
+        try {
+          this.recognition.stop();
+        } catch (e) {}
+      }
+      this.recognition = null;
+      this.phase = "idle";
+    },
+
+    pauseSession(message) {
+      chatVlog("session pause");
+      this.sessionToken++;
+      this.sessionActive = false;
+      this.paused = true;
+      this.silentStrikes = 0;
+      this.clearTimers();
+      this.speakToken++;
+      if (typeof VoiceIO !== "undefined") VoiceIO.cancelSpeaking();
+      this.recognition = null;
+      this.phase = "idle";
+      this.voiceMessage = message || this.labels.pauseHint || "";
+    },
+
+    clearTimers() {
+      if (this.retryTimer) {
+        clearTimeout(this.retryTimer);
+        this.retryTimer = null;
+      }
+      if (this.silenceTimer) {
+        clearTimeout(this.silenceTimer);
+        this.silenceTimer = null;
+      }
+    },
+
+    scheduleNextListen() {
+      this.clearTimers();
+      const token = this.sessionToken;
+      const self = this;
+      this.retryTimer = setTimeout(() => {
+        self.retryTimer = null;
+        if (self.sessionActive && token === self.sessionToken && self.phase === "idle") {
+          self.startListening(true);
+        }
+      }, 500);
+    },
+
+    startListening(fromSession) {
+      if (!this.voiceInSupported || typeof VoiceIO === "undefined") return;
+      this.clearTimers();
+      this.voiceMessage = "";
+      this.phase = "listening";
+      chatVlog("listening start", "session=" + this.sessionActive, "fromSession=" + fromSession);
+      const self = this;
+      const token = this.sessionToken;
+      let finished = false;
+      let listenWatchdog = null;
+      const clearListenWatchdog = () => {
+        if (listenWatchdog) {
+          clearTimeout(listenWatchdog);
+          listenWatchdog = null;
+        }
+      };
