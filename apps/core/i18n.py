@@ -637,3 +637,90 @@ STRINGS = {
     "not_found_btn": {
         "bn": "না, পাইনি",
         "en": "No, can't find it",
+    },
+    "lost_fallback": {
+        "bn": "কাছের ইনফরমেশন ডেস্কে যান — কর্মীরা সব দেখিয়ে দেবেন।",
+        "en": "Go to the nearest information desk — staff will show you the way.",
+    },
+    "lost_arrived": {
+        "bn": "আপনি পৌঁছে গেছেন!",
+        "en": "You have arrived!",
+    },
+    "unknown_qr": {
+        "bn": "এই QR কোডটি চেনা যায়নি। কাছের অন্য কোডটি চেষ্টা করুন।",
+        "en": "This QR code was not recognised. Try another nearby code.",
+    },
+    "info_desk_label": {
+        "bn": "ইনফরমেশন ডেস্ক",
+        "en": "Information desk",
+    },
+    "chat_placeholder": {
+        "bn": "আপনার প্রশ্ন লিখুন…",
+        "en": "Type your question…",
+    },
+    "chat_send_btn": {
+        "bn": "পাঠান",
+        "en": "Send",
+    },
+    "chat_mic": {
+        "bn": "মাইকে বলুন",
+        "en": "Speak",
+    },
+    "chat_listening": {
+        "bn": "শুনছি… কথা বলুন",
+        "en": "Listening… speak now",
+    },
+    "chat_voice_unsupported": {
+        "bn": "ভয়েস সেটআপ নেই — লিখে জিজ্ঞেস করুন",
+        "en": "Voice is not set up — please type instead",
+    },
+    "chat_voice_needs_https": {
+        "bn": "মাইকের জন্য HTTPS বা localhost দরকার — লিখে জিজ্ঞেস করুন",
+        "en": "Microphone needs HTTPS or localhost — please type instead",
+    },
+    "voice_tap_to_speak": {
+        "bn": "ট্যাপ করে বলুন",
+        "en": "Tap to speak",
+    },
+    "voice_thinking": {
+        "bn": "ভাবছি…",
+        "en": "Thinking…",
+    },
+    "voice_speaking": {
+        "bn": "বলছি…",
+        "en": "Speaking…",
+    },
+    "voice_stop_hint": {
+        "bn": "থামাতে ট্যাপ করুন",
+        "en": "Tap to stop",
+    },
+    "voice_heard": {
+        "bn": "আপনি বললেন:",
+        "en": "You said:",
+    },
+    "voice_handsfree": {
+        "bn": "হ্যান্ডস-ফ্রি",
+        "en": "Hands-free",
+    },
+    "voice_type_instead": {
+        "bn": "লিখে জিজ্ঞেস করুন",
+        "en": "Type instead",
+    },
+    "voice_back_to_voice": {
+        "bn": "ভয়েসে ফিরুন",
+        "en": "Back to voice",
+    },
+    "voice_empty_heard": {
+        "bn": "কিছু শুনতে পাইনি — আবার ট্যাপ করুন",
+        "en": "I didn't hear that — tap to try again",
+    },
+    "voice_error_heard": {
+        "bn": "শুনতে সমস্যা হয়েছে — আবার চেষ্টা করুন",
+        "en": "Couldn't hear you — please try again",
+    },
+    "voice_start": {
+        "bn": "মাইকে ট্যাপ করুন",
+        "en": "Tap the mic to start",
+    },
+    "voice_end": {
+        "bn": "শেষ করুন",
