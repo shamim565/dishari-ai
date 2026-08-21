@@ -44,3 +44,31 @@ def tts(request):
         attempts = [("gemini", gemini), ("azure", azure)]
     else:
         attempts = [("azure", azure), ("gemini", gemini)]
+
+    used = None
+    audio = None
+    voice = ""
+    for name, module in attempts:
+        if name == "gemini" and not gemini.gemini_configured():
+            continue
+        if name == "azure" and not azure.azure_configured():
+            continue
+        try:
+            audio, voice = module.synthesize(text, lang)
+            used = name
+            break
+        except Exception:
+            audio = None
+
+    if audio is None:
+        if not gemini.gemini_configured() and not azure.azure_configured():
+            return JsonResponse({"detail": "tts_unavailable"}, status=503)
+        return JsonResponse({"detail": "tts_error"}, status=502)
+
+    response = HttpResponse(
+        audio, content_type="audio/wav" if used == "gemini" else "audio/mpeg"
+    )
+    response["X-Voice"] = voice
+    response["X-TTS-Provider"] = used or ""
+    response["Cache-Control"] = "public, max-age=86400"
+    return response
