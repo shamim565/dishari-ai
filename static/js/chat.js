@@ -241,3 +241,78 @@ function chatApp() {
           listenWatchdog = null;
         }
       };
+
+      const armSilenceTimer = () => {
+        if (self.silenceTimer) clearTimeout(self.silenceTimer);
+        self.silenceTimer = setTimeout(() => {
+          self.silenceTimer = null;
+          if (self.sessionActive) self.pauseSession(self.labels.paused || "");
+        }, 120000);
+      };
+      if (this.sessionActive) armSilenceTimer();
+
+      const onEmptyTurn = () => {
+        if (!self.sessionActive) return;
+        self.silentStrikes++;
+        chatVlog("empty turn", "strikes=" + self.silentStrikes);
+        if (self.silentStrikes >= 3) {
+          self.pauseSession(self.labels.paused || "");
+          return;
+        }
+        self.voiceMessage = self.labels.noSpeech || "";
+        self.retryTimer = setTimeout(() => {
+          self.retryTimer = null;
+          if (self.sessionActive && token === self.sessionToken) self.startListening(true);
+        }, 1200);
+      };
+
+      const finalize = (text) => {
+        if (finished) return;
+        finished = true;
+        clearListenWatchdog();
+        if (token !== self.sessionToken) return;
+        if (self.phase !== "listening") return;
+        const transcript = (text || "").trim();
+        if (transcript) {
+          chatVlog("transcript", transcript);
+          self.silentStrikes = 0;
+          self.voiceMessage = "";
+          if (self.silenceTimer) {
+            clearTimeout(self.silenceTimer);
+            self.silenceTimer = null;
+          }
+          self.send(transcript);
+        } else if (self.sessionActive) {
+          onEmptyTurn();
+        } else {
+          self.phase = "idle";
+        }
+      };
+
+      const fail = (code) => {
+        if (finished) return;
+        finished = true;
+        clearListenWatchdog();
+        if (token !== self.sessionToken) return;
+        chatVlog("listen error:", code);
+        if (code === "no-speech" || code === "aborted") {
+          if (self.phase === "listening") self.phase = "idle";
+          if (self.sessionActive) onEmptyTurn();
+          return;
+        }
+        if (code === "not-allowed" || code === "service-not-allowed" || code === "audio-capture") {
+          self.voiceMessage = self.labels.errorHeard || "";
+          if (self.sessionActive) self.pauseSession(self.labels.errorHeard || "");
+          else self.phase = "idle";
+          return;
+        }
+        if (code === "language-not-supported") {
+          const msg = self.labels.langUnsupported || self.labels.errorHeard || "";
+          self.voiceMessage = msg;
+          if (self.sessionActive) self.pauseSession(msg);
+          else self.phase = "idle";
+          return;
+        }
+        if (self.phase === "listening") self.phase = "idle";
+        if (self.sessionActive) onEmptyTurn();
+      };
