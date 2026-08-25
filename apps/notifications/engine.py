@@ -69,3 +69,44 @@ def create_event(flight, kind, *, counters="", block="", gate="", delay_minutes=
         gate_en = f"Gate {flight.gate}" if flight.gate else "the boarding gate"
         messages = (
             f"আপনার ফ্লাইটের বোর্ডিং শুরু হয়েছে। এখনই {gate_bn} যান।",
+            f"Boarding has started for your flight. Go to {gate_en} now.",
+        )
+    elif kind == FlightEvent.KIND_FINAL_CALL:
+        flight.status = Flight.STATUS_FINAL_CALL
+        update_fields.append("status")
+        gate_bn = f"গেট {flight.gate}" if flight.gate else "বোর্ডিং গেট"
+        gate_en = f"Gate {flight.gate}" if flight.gate else "the boarding gate"
+        messages = (
+            f"ফাইনাল কল চলছে! দ্রুত {gate_bn}-এ যান, গেট বন্ধ হয়ে যাচ্ছে।",
+            f"Final call! Go to {gate_en} immediately, the gate is closing.",
+        )
+    elif kind == FlightEvent.KIND_DELAY:
+        base = flight.est_departure or flight.sched_departure
+        base_dt = datetime.combine(flight.date, base)
+        new_dt = base_dt + timedelta(minutes=delay_minutes)
+        flight.est_departure = new_dt.time()
+        flight.status = Flight.STATUS_DELAYED
+        update_fields += ["est_departure", "status"]
+        delta_bn, delta_en = _fmt_delta(delay_minutes)
+        messages = (
+            f"আপনার ফ্লাইট {delta_bn} বিলম্বিত হয়েছে। নতুন সম্ভাব্য ছাড়ার সময় {_fmt_time(flight.est_departure, 'bn')}। আপাতত কাউন্টারে যাওয়ার দরকার নেই।",
+            f"Your flight is delayed by {delta_en}. New estimated departure: {_fmt_time(flight.est_departure, 'en')}. No need to go to the counter yet.",
+        )
+    elif kind == FlightEvent.KIND_CANCELLED:
+        flight.status = Flight.STATUS_CANCELLED
+        update_fields.append("status")
+        messages = (
+            "দুঃখিত, আপনার ফ্লাইটটি বাতিল হয়েছে। এয়ারলাইনের সহায়তা কাউন্টারে যোগাযোগ করুন।",
+            "We are sorry, your flight has been cancelled. Please contact the airline assistance counter.",
+        )
+    else:
+        raise ValueError(f"Unknown event kind: {kind}")
+
+    flight.save(update_fields=list(dict.fromkeys(update_fields)))
+    return FlightEvent.objects.create(
+        flight=flight,
+        kind=kind,
+        message_bn=messages[0],
+        message_en=messages[1],
+        priority=priority,
+    )
