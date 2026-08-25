@@ -122,3 +122,69 @@ def ops_panel(request):
             "message_total": len(user_messages),
         },
     )
+
+
+ACTION_KINDS = {
+    "check-in-open": FlightEvent.KIND_CHECK_IN_OPEN,
+    "counter-change": FlightEvent.KIND_COUNTER_CHANGE,
+    "gate-assign": FlightEvent.KIND_GATE_ASSIGNED,
+    "gate-change": FlightEvent.KIND_GATE_CHANGE,
+    "boarding": FlightEvent.KIND_BOARDING,
+    "final-call": FlightEvent.KIND_FINAL_CALL,
+    "delay": FlightEvent.KIND_DELAY,
+    "cancel": FlightEvent.KIND_CANCELLED,
+}
+
+
+@require_POST
+def ops_action(request, pk, action):
+    guard = ops_guard(request)
+    if guard:
+        return guard
+    kind = ACTION_KINDS.get(action)
+    flight = Flight.objects.filter(pk=pk).first()
+    if not kind or not flight:
+        messages.error(request, f"Unknown action: {action}")
+        return redirect("ops_panel")
+
+    if kind == FlightEvent.KIND_COUNTER_CHANGE:
+        create_event(
+            flight,
+            kind,
+            counters=(request.POST.get("counters") or "").strip(),
+            block=(request.POST.get("block") or "").strip().upper(),
+        )
+    elif kind in (FlightEvent.KIND_GATE_ASSIGNED, FlightEvent.KIND_GATE_CHANGE):
+        create_event(flight, kind, gate=(request.POST.get("gate") or "").strip().upper())
+    elif kind == FlightEvent.KIND_DELAY:
+        try:
+            minutes = max(5, min(int(request.POST.get("minutes", 60)), 24 * 60))
+        except (TypeError, ValueError):
+            minutes = 60
+        create_event(flight, kind, delay_minutes=minutes)
+    else:
+        create_event(flight, kind)
+
+    messages.success(request, f"{flight.number}: {kind} event sent.")
+    return redirect("ops_panel")
+
+
+@require_POST
+def ops_reset(request):
+    guard = ops_guard(request)
+    if guard:
+        return guard
+    call_command("seed_demo")
+    call_command("seed_nav")
+    messages.success(request, "Demo data reset (flights + layout re-seeded, sessions cleared).")
+    return redirect("ops_panel")
+
+
+@require_POST
+def ops_clear_events(request):
+    guard = ops_guard(request)
+    if guard:
+        return guard
+    FlightEvent.objects.all().delete()
+    messages.success(request, "All flight events cleared.")
+    return redirect("ops_panel")
