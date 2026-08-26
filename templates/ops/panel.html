@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load ui_extras %}
+{% block title %}Operator Panel · {{ t.app_name }}{% endblock %}
+{% block chrome %}
+<div class="relative mx-auto w-full max-w-4xl px-4 py-6 lg:py-10">
+  <header class="flex flex-wrap items-center justify-between gap-3">
+    <div class="flex items-center gap-3">
+      <span class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5" aria-hidden="true">
+          <path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z"/>
+        </svg>
+      </span>
+      <div>
+        <h1 class="text-lg font-semibold leading-tight">Operator Panel</h1>
+        <p class="text-xs text-slate-400">{{ t.airport_name }} · demo control</p>
+      </div>
+    </div>
+    <div class="flex flex-wrap items-center gap-2">
+      <a href="/admin/" class="ops-btn">Django admin</a>
+      <form method="post" action="{% url 'ops_reset' %}" onsubmit="return confirm('Re-seed flights + layout and clear all sessions/scans?')">
+        {% csrf_token %}
+        <button type="submit" class="ops-btn ops-btn-warn">Reset demo data</button>
+      </form>
+      <form method="post" action="{% url 'ops_clear_events' %}">
+        {% csrf_token %}
+        <button type="submit" class="ops-btn ops-btn-warn">Clear events</button>
+      </form>
+      <a href="{% url 'ops_logout' %}" class="ops-btn">Lock</a>
+    </div>
+  </header>
+
+  {% if messages %}
+  <div class="mt-4 space-y-2">
+    {% for message in messages %}
+    <div class="info-banner"><span>{{ message }}</span></div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <section class="mt-5 grid grid-cols-3 gap-3">
+    <div class="card px-4 py-3 text-center">
+      <p class="text-2xl font-bold tabular-nums">{{ stats.sessions }}</p>
+      <p class="text-[11px] uppercase tracking-widest text-slate-500">Sessions</p>
+    </div>
+    <div class="card px-4 py-3 text-center">
+      <p class="text-2xl font-bold tabular-nums">{{ stats.scans }}</p>
+      <p class="text-[11px] uppercase tracking-widest text-slate-500">Ticket scans</p>
+    </div>
+    <div class="card px-4 py-3 text-center">
+      <p class="text-2xl font-bold tabular-nums">{{ stats.messages }}</p>
+      <p class="text-[11px] uppercase tracking-widest text-slate-500">Chat messages</p>
+    </div>
+  </section>
+
+  <div class="mt-6 grid gap-6 lg:grid-cols-3">
+    <div class="space-y-4 lg:col-span-2">
+      <h2 class="text-[11px] uppercase tracking-widest text-slate-500">Today's flights — trigger live events</h2>
+      {% for flight in flights %}
+      <div class="card p-4">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <p class="font-semibold">{{ flight.number }} · {{ flight.airline.name }}</p>
+            <p class="mt-0.5 text-xs text-slate-400">
+              {{ flight.origin.code }} → {{ flight.destination.code }} ·
+              sched {{ flight.sched_departure|airport_time:"en" }}
+              {% if flight.est_departure %}· <span class="text-amber-300">est {{ flight.est_departure|airport_time:"en" }}</span>{% endif %}
+              · {{ flight.terminal }}
+            </p>
+          </div>
+          <span class="chip {{ flight.status|status_class }}">{{ flight.get_status_display }}</span>
+        </div>
+
+        <p class="mt-2 text-xs text-slate-400">
+          Check-in: {% if flight.checkin_open %}<span class="text-emerald-300">open</span>{% else %}closed{% endif %}
+          · counters {{ flight.checkin_counters|default:"—" }} · block {{ flight.checkin_block|default:"—" }}
+          · gate {{ flight.gate|default:"—" }}
+        </p>
+
+        <div class="mt-3 flex flex-wrap gap-2">
+          <form method="post" action="{% url 'ops_action' flight.pk 'check-in-open' %}">
+            {% csrf_token %}<button class="ops-btn ops-btn-go">Check-in open</button>
+          </form>
+          <form method="post" action="{% url 'ops_action' flight.pk 'boarding' %}">
+            {% csrf_token %}<button class="ops-btn ops-btn-go">Boarding</button>
+          </form>
+          <form method="post" action="{% url 'ops_action' flight.pk 'final-call' %}">
+            {% csrf_token %}<button class="ops-btn ops-btn-urgent">Final call</button>
+          </form>
+          <form method="post" action="{% url 'ops_action' flight.pk 'cancel' %}" onsubmit="return confirm('Cancel {{ flight.number }}?')">
+            {% csrf_token %}<button class="ops-btn ops-btn-danger">Cancel flight</button>
+          </form>
+        </div>
+
+        <div class="mt-3 grid gap-2 sm:grid-cols-3">
+          <form method="post" action="{% url 'ops_action' flight.pk 'counter-change' %}" class="ops-inline">
+            {% csrf_token %}
+            <input class="ops-input" name="counters" placeholder="17-20" value="{{ flight.checkin_counters }}">
+            <input class="ops-input ops-input-sm" name="block" placeholder="A" value="{{ flight.checkin_block }}">
+            <button class="ops-btn">Change counters</button>
+          </form>
