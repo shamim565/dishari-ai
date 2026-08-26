@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Operator Panel · {{ t.app_name }}{% endblock %}
+{% block chrome %}
+<main class="relative mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center px-5 py-10">
+  <div class="card p-6">
+    <div class="mb-5 flex items-center gap-3">
+      <span class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" class="h-5 w-5" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/>
+        </svg>
+      </span>
+      <div>
+        <p class="text-[15px] font-semibold">Operator Panel</p>
+        <p class="text-xs text-slate-400">Airport staff demo control</p>
+      </div>
+    </div>
+    {% if error %}
+    <div class="error-banner mb-4"><span>Wrong PIN. Try again.</span></div>
+    {% endif %}
