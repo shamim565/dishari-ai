@@ -42,3 +42,37 @@
 
     const actions = document.createElement("div");
     actions.className = "toast-actions";
+
+    const refresh = document.createElement("button");
+    refresh.type = "button";
+    refresh.className = "toast-btn";
+    refresh.textContent = config.strings.refresh;
+    refresh.addEventListener("click", () => window.location.reload());
+
+    const dismiss = document.createElement("button");
+    dismiss.type = "button";
+    dismiss.className = "toast-btn";
+    dismiss.textContent = "\u2715";
+    dismiss.addEventListener("click", () => toast.remove());
+
+    actions.appendChild(refresh);
+    actions.appendChild(dismiss);
+    body.appendChild(title);
+    body.appendChild(message);
+    body.appendChild(actions);
+    toast.appendChild(icon);
+    toast.appendChild(body);
+    wrap.appendChild(toast);
+
+    setTimeout(() => toast.remove(), urgent ? 20000 : 10000);
+  }
+
+  function handleEvent(event) {
+    showToast(event);
+    if (event.speak && (notifyEnabled() || event.priority === "urgent")) {
+      if (typeof VoiceIO !== "undefined") {
+        VoiceIO.speak(event.message, config.lang, config.ttsUrl, config.csrf);
+      }
+    }
+    window.dispatchEvent(new Event("dishari:notify"));
+  }
