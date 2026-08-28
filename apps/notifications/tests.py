@@ -119,3 +119,99 @@ class NotificationsApiTests(TestCase):
         events = response.json()["events"]
         self.assertEqual(len(events), 1)
         self.assertEqual(events[0]["kind"], "BOARDING")
+
+
+class NotificationsPageTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed_demo")
+
+    def app_client(self):
+        client = Client()
+        session = client.session
+        session["lang"] = "bn"
+        session.save()
+        return client
+
+    def test_page_without_journey(self):
+        client = self.app_client()
+        response = client.get(reverse("home") + "?view=notifications")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "বিজ্ঞপ্তি")
+
+    def test_page_with_event(self):
+        client = self.app_client()
+        flight = Flight.objects.get(number="BG147")
+        client.post(reverse("ticket_demo_pick", args=[flight.pk]))
+        create_event(flight, FlightEvent.KIND_GATE_CHANGE, gate="12")
+        response = client.get(reverse("home") + "?view=notifications")
+        self.assertContains(response, "গুরুত্বপূর্ণ")
+        self.assertContains(response, "12")
+
+
+class OpsPanelTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed_demo")
+
+    def test_panel_requires_pin(self):
+        client = Client()
+        response = client.get(reverse("ops_panel"))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], reverse("ops_login"))
+
+    def test_wrong_pin_rejected(self):
+        client = Client()
+        response = client.post(reverse("ops_login"), {"pin": "0000"})
+        self.assertContains(response, "Wrong PIN")
+
+    def test_pin_unlocks_and_action_works(self):
+        client = Client()
+        response = client.post(reverse("ops_login"), {"pin": "1234"})
+        self.assertEqual(response.status_code, 302)
+
+        flight = Flight.objects.get(number="BG147")
+        response = client.post(reverse("ops_action", args=[flight.pk, "gate-change"]), {"gate": "12"})
+        self.assertEqual(response.status_code, 302)
+
+        flight.refresh_from_db()
+        self.assertEqual(flight.gate, "12")
+        event = FlightEvent.objects.latest("id")
+        self.assertEqual(event.kind, FlightEvent.KIND_GATE_CHANGE)
+        self.assertTrue(event.is_urgent)
+
+    def test_action_requires_unlock(self):
+        client = Client()
+        flight = Flight.objects.get(number="BG147")
+        response = client.post(reverse("ops_action", args=[flight.pk, "boarding"]))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], reverse("ops_login"))
+
+    def test_panel_renders_with_flights(self):
+        client = Client()
+        client.post(reverse("ops_login"), {"pin": "1234"})
+        response = client.get(reverse("ops_panel"))
+        self.assertContains(response, "BG147")
+        self.assertContains(response, "Check-in open")
+        self.assertContains(response, "Passenger intelligence")
+
+    def test_panel_shows_question_topics(self):
+        from apps.chat.models import ChatMessage
+
+        ChatMessage.objects.create(role="user", content="আমার গেট কোথায়?", lang="bn", source="demo")
+        ChatMessage.objects.create(role="user", content="Where is my gate?", lang="en", source="demo")
+        client = Client()
+        client.post(reverse("ops_login"), {"pin": "1234"})
+        response = client.get(reverse("ops_panel"))
+        self.assertContains(response, "Gate")
+
+    def test_reset_reseeds_data(self):
+        client = Client()
+        client.post(reverse("ops_login"), {"pin": "1234"})
+        JourneySession.objects.create(
+            passenger_name="X", flight=Flight.objects.get(number="BG147"), source="demo"
+        )
+        response = client.post(reverse("ops_reset"))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(JourneySession.objects.count(), 0)
+        self.assertEqual(Flight.objects.count(), 8)
