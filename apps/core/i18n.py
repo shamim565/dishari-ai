@@ -724,3 +724,84 @@ STRINGS = {
     },
     "voice_end": {
         "bn": "শেষ করুন",
+        "en": "End",
+    },
+    "voice_pause_hint": {
+        "bn": "আবার শুরু করুন",
+        "en": "Start again",
+    },
+    "voice_paused": {
+        "bn": "কথোপকথন থামিয়ে রাখা হয়েছে — আবার শুরু করুন",
+        "en": "Conversation paused — start again",
+    },
+    "voice_no_speech": {
+        "bn": "শুনতে পাচ্ছি না — আবার বলুন",
+        "en": "I can't hear you — please speak again",
+    },
+    "voice_lang_unsupported": {
+        "bn": "এই ব্রাউজারে বাংলা ভয়েস রেকগনিশন নেই — ইংরেজিতে বলুন বা টাইপ করুন",
+        "en": "Bangla voice recognition isn't available here — try English or type instead",
+    },
+    "voice_session_greeting": {
+        "bn": "আসসালামু আলাইকুম! আমি দিশারী এআই — আপনার এয়ারপোর্ট সঙ্গী। বলুন, কী জানতে চান?",
+        "en": "Hello! I am Dishari AI, your airport companion. Speak — what would you like to know?",
+    },
+    "voice_filler": {
+        "bn": "জি, এক মুহূর্ত দেখছি…",
+        "en": "Yes, one moment…",
+    },
+    "voice_live_fallback": {
+        "bn": "লাইভ সংযোগ পাওয়া যায়নি — ভয়েস মোডে চলছে",
+        "en": "Live connection unavailable — running in voice mode",
+    },
+    "voice_mic_error": {
+        "bn": "মাইক্রোফোন পাওয়া যায়নি — অনুমতি দিয়ে আবার চেষ্টা করুন",
+        "en": "Microphone unavailable — allow access and try again",
+    },
+    "voice_conn_lost": {
+        "bn": "সংযোগ বিচ্ছিন্ন হয়েছে — আবার চেষ্টা করুন",
+        "en": "Connection lost — try again",
+    },
+    "voice_connecting": {
+        "bn": "সংযোগ হচ্ছে…",
+        "en": "Connecting…",
+    },
+    "chat_auto_speak": {
+        "bn": "উত্তর শুনুন",
+        "en": "Speak replies",
+    },
+    "on_label": {
+        "bn": "চালু",
+        "en": "on",
+    },
+    "off_label": {
+        "bn": "বন্ধ",
+        "en": "off",
+    },
+    "chat_replay": {
+        "bn": "আবার শুনুন",
+        "en": "Play again",
+    },
+    "chat_error": {
+        "bn": "উত্তর আনতে সমস্যা হয়েছে। আবার চেষ্টা করুন।",
+        "en": "Something went wrong getting an answer. Please try again.",
+    },
+    "chat_demo_chip": {
+        "bn": "ডেমো মোড",
+        "en": "Demo mode",
+    },
+    "sug_next": {
+        "bn": "এখন আমি কী করব?",
+        "en": "What should I do now?",
+    },
+    "sug_gate": {
+        "bn": "আমার গেট কোথায়?",
+        "en": "Where is my gate?",
+    },
+    "sug_time": {
+        "bn": "কত সময় বাকি?",
+        "en": "How much time is left?",
+    },
+    "sug_immigration": {
+        "bn": "ইমিগ্রেশন কোথায়?",
+        "en": "Where is immigration?",
