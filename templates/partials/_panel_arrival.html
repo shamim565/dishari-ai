@@ -1,0 +1,26 @@
+{% load ui_extras %}
+<div class="space-y-5">
+  <div class="text-center">
+    <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl border border-emerald-400/30 bg-emerald-400/10 text-emerald-300">
+      <svg viewBox="0 0 24 24" fill="currentColor" class="h-8 w-8" aria-hidden="true">
+        <path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z"/>
+      </svg>
+    </div>
+    <h1 class="mt-4 text-xl font-semibold">{{ t.arrival_title }}</h1>
+  </div>
+
+  <section class="card px-4 py-4">
+    <h2 class="text-[11px] uppercase tracking-widest text-amber-300">{{ t.transit_section }}</h2>
+    <ol class="tl mt-3.5">
+      {% for step in transit_steps %}
+      <li class="tl-item tl-current">
+        {% if not forloop.last %}<span class="tl-line" aria-hidden="true"></span>{% endif %}
+        <span class="tl-marker">{{ forloop.counter }}</span>
+        <span class="tl-label">
+          <span class="block text-sm font-semibold text-slate-200">{{ step.title }}</span>
+          <span class="mt-0.5 block text-xs leading-relaxed text-slate-400">{{ step.text }}</span>
+        </span>
+      </li>
+      {% endfor %}
+    </ol>
+  </section>
