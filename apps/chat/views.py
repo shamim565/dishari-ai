@@ -80,3 +80,64 @@ def _llm_stream(setup, messages):
         delta = chunk.choices[0].delta.content or ""
         if delta:
             yield delta
+
+
+@require_POST
+def chat_send(request):
+    message = (request.POST.get("message") or "").strip()[:MAX_MESSAGE_CHARS]
+    if not message:
+        return JsonResponse({"detail": "empty"}, status=400)
+
+    lang = _lang(request)
+    journey = get_active_journey(request)
+    setup = registry.chat_setup()
+
+    _store_message(
+        request,
+        journey,
+        role="user",
+        content=message,
+        lang=lang,
+        source="llm" if setup else "demo",
+    )
+
+    def stream():
+        full = []
+        source = "llm"
+        pending_events = []
+        try:
+            emergency = detect_emergency(message, lang)
+            if emergency:
+                source = "demo"
+                pending_events.append(emergency["event"])
+                iterator = _chunk_text(emergency["text"])
+            elif setup:
+                history = list(
+                    _history_qs(request, journey).order_by("-created_at")[:10]
+                )[::-1]
+                messages = chat_messages(journey, request, lang, history[:-1], message)
+                iterator = _llm_stream(setup, messages)
+            else:
+                source = "demo"
+                reply = demo_reply(message, journey, request, lang)
+                pending_events.extend(reply["events"])
+                iterator = _chunk_text(reply["text"])
+            for delta in iterator:
+                full.append(delta)
+                yield _sse({"delta": delta})
+            for event in pending_events:
+                yield _sse(event)
+        except Exception:
+            fallback = {
+                "bn": "দুঃখিত, এই মুহূর্তে উত্তর দিতে পারছি না। আবার চেষ্টা করুন বা ইনফরমেশন ডেস্কে জিজ্ঞেস করুন।",
+                "en": "Sorry, I cannot answer right now. Please try again or ask the information desk.",
+            }[lang]
+            full = [fallback]
+            source = "demo"
+            yield _sse({"delta": fallback})
+        finally:
+            text = "".join(full).strip()
+            saved = _store_message(
+                request, journey, role="assistant", content=text, lang=lang, source=source
+            )
+            yield _sse({"done": True, "message_id": saved.pk})
