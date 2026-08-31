@@ -162,3 +162,72 @@ def demo_reply(message, journey, request, lang=DEFAULT_LANG):
             "en": "If you have a connecting flight, follow the 'Transfers' sign after leaving the aircraft. Show your passport and onward ticket at the transfer desk, clear transit security, then go to your next flight's gate.",
         }[lang]
         return _reply(reply + DEMO_NOTICE[lang])
+
+    if _contains(message, "arrival"):
+        reply = {
+            "bn": "ঢাকায় নামার পর: আগমন ইমিগ্রেশন → ব্যাগেজ ক্লেইম (ডিসপ্লেতে বেল্ট নম্বর দেখুন) → কাস্টমস → এক্সিট। বিস্তারিত গাইড ট্রানজিট ও আগমন পেজে আছে।",
+            "en": "After landing in Dhaka: arrival immigration → baggage claim (check the belt number on screens) → customs → exit. The full guide is on the Transit & Arrival page.",
+        }[lang]
+        return _reply(reply + DEMO_NOTICE[lang])
+
+    if _contains(message, "baggage"):
+        reply = {
+            "bn": "ব্যাগেজ ক্লেইমে ডিসপ্লেতে আপনার ফ্লাইট নম্বর দেখে সঠিক বেল্টে যান। ব্যাগ হারিয়ে গেলে এয়ারলাইনের ব্যাগেজ সার্ভিস ডেস্কে রিপোর্ট করুন।",
+            "en": "At baggage claim, check the screens for your flight number and collect your bags from the correct belt. If a bag is missing, report it at the airline's baggage services desk.",
+        }[lang]
+        return _reply(reply + DEMO_NOTICE[lang])
+
+    if _contains(message, "customs"):
+        reply = {
+            "bn": "কিছু ঘোষণা করার থাকলে red channel, না থাকলে green channel দিয়ে বের হন। নিষিদ্ধ বা সীমার বেশি জিনিস সঙ্গে রাখবেন না।",
+            "en": "Use the red channel if you have goods to declare, otherwise the green channel. Do not carry prohibited items or amounts over the limit.",
+        }[lang]
+        return _reply(reply + DEMO_NOTICE[lang])
+
+    if _contains(message, "gate"):
+        if journey and journey.flight.gate:
+            if lang == "bn":
+                return _reply(
+                    f"আপনার বোর্ডিং গেট {journey.flight.gate}। গেট নম্বর নিশ্চিত করে কাছেই অপেক্ষা করুন।"
+                    + DEMO_NOTICE[lang]
+                )
+            return _reply(
+                f"Your boarding gate is {journey.flight.gate}. Wait nearby and watch for boarding calls."
+                + DEMO_NOTICE[lang]
+            )
+        base = {
+            "bn": "গেট এখনো ঘোষণা হয়নি — ঘোষণা হলেই আপনাকে জানানো হবে। এয়ারসাইড করিডোরে গেটের সাইন দেখতে পাবেন।",
+            "en": "The gate has not been announced yet — you will be notified. Gate signs appear along the airside corridor.",
+        }[lang]
+        return _reply(base + DEMO_NOTICE[lang])
+
+    if _contains(message, "time"):
+        if journey:
+            countdowns = engine.countdowns(journey)
+            dep = countdowns[0]
+            board = countdowns[1]
+            if lang == "bn":
+                reply = f"ছাড়ার সময় {format_clock(dep['at'], lang)}"
+                if dep["minutes"] > 0:
+                    reply += f", অর্থাৎ {dep['minutes']} মিনিট বাকি।"
+                reply += f" বোর্ডিং শুরু {format_clock(board['at'], lang)}-এ। গেটে হাঁটা লাগবে প্রায় ১২ মিনিট।"
+            else:
+                reply = f"Departure is at {format_clock(dep['at'], lang)}"
+                if dep["minutes"] > 0:
+                    reply += f" ({dep['minutes']} minutes from now)."
+                reply += f" Boarding starts at {format_clock(board['at'], lang)}. The walk to the gate takes about 12 minutes."
+            return _reply(reply + DEMO_NOTICE[lang])
+        return _reply(FALLBACK[lang], [_handoff_event(request, lang)])
+
+    if _contains(message, "counter"):
+        if journey and journey.flight.checkin_counters:
+            if lang == "bn":
+                return _reply(
+                    f"আপনার চেক-ইন কাউন্টার {journey.flight.checkin_counters}, ব্লক {journey.flight.checkin_block}। "
+                    "চেক-ইন হলের সাইন অনুসরণ করুন।" + DEMO_NOTICE[lang]
+                )
+            return _reply(
+                f"Your check-in counters are {journey.flight.checkin_counters}, Block {journey.flight.checkin_block}. "
+                "Follow the check-in signs in the hall." + DEMO_NOTICE[lang]
+            )
+        return _reply(FALLBACK[lang])
