@@ -49,3 +49,13 @@ class JourneySession(models.Model):
     extraction = models.JSONField(default=dict, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField(default=default_expiry)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.passenger_name} · {self.flight.number} · {self.stage}"
+
+    @property
+    def is_active(self):
+        return timezone.now() < self.expires_at
