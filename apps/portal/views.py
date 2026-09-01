@@ -72,3 +72,12 @@ def assistant(request):
         }
     )
     return render(request, "assistant/shell.html", context)
+
+
+def home(request):
+    journey = get_active_journey(request)
+    view = request.GET.get("view") or _default_view(journey)
+    if view not in VALID_VIEWS:
+        view = _default_view(journey)
+    if view == "journey" and not journey:
+        view = "ticket"
