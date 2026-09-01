@@ -805,3 +805,83 @@ STRINGS = {
     "sug_immigration": {
         "bn": "ইমিগ্রেশন কোথায়?",
         "en": "Where is immigration?",
+    },
+    "notif_title": {
+        "bn": "বিজ্ঞপ্তি",
+        "en": "Notifications",
+    },
+    "notif_empty": {
+        "bn": "এখনো কোনো বিজ্ঞপ্তি নেই",
+        "en": "No notifications yet",
+    },
+    "notif_enable": {
+        "bn": "ভয়েস সতর্কতা",
+        "en": "Voice alerts",
+    },
+    "notif_urgent": {
+        "bn": "গুরুত্বপূর্ণ",
+        "en": "Important",
+    },
+    "notif_refresh": {
+        "bn": "আপডেট দেখুন",
+        "en": "Show update",
+    },
+    "quick_arrival_tile": {
+        "bn": "ট্রানজিট ও আগমন",
+        "en": "Transit & Arrival",
+    },
+    "quick_arrival_desc": {
+        "bn": "সংযোগ ও আগমনের গাইড",
+        "en": "Connections & arrival guide",
+    },
+    "arrival_title": {
+        "bn": "ট্রানজিট ও আগমন গাইড",
+        "en": "Transit & Arrival Guide",
+    },
+    "transit_section": {
+        "bn": "কানেক্টিং ফ্লাইট থাকলে (ট্রানজিট)",
+        "en": "If you have a connecting flight (transit)",
+    },
+    "arrival_section": {
+        "bn": "ঢাকায় নামার পর (আগমন)",
+        "en": "After landing in Dhaka (arrival)",
+    },
+    "trans_step1_title": {
+        "bn": "ট্রান্সফার সাইন",
+        "en": "Follow the Transfers sign",
+    },
+    "trans_step1_text": {
+        "bn": "ফ্লাইট থেকে নেমে 'Transfers' সাইন অনুসরণ করুন।",
+        "en": "After leaving the aircraft, follow the 'Transfers' sign.",
+    },
+    "trans_step2_title": {
+        "bn": "ট্রান্সফার ডেস্ক",
+        "en": "Transfer desk",
+    },
+    "trans_step2_text": {
+        "bn": "ট্রান্সফার ডেস্কে পাসপোর্ট ও পরবর্তী ফ্লাইটের টিকিট দেখান।",
+        "en": "Show your passport and onward ticket at the transfer desk.",
+    },
+    "trans_step3_title": {
+        "bn": "ট্রানজিট সিকিউরিটি",
+        "en": "Transit security",
+    },
+    "trans_step3_text": {
+        "bn": "ট্রানজিট যাত্রীদের জন্য আলাদা সিকিউরিটি চেক পার হবেন।",
+        "en": "Clear the dedicated transit security check.",
+    },
+    "trans_step4_title": {
+        "bn": "পরবর্তী ফ্লাইটের গেট",
+        "en": "Next flight's gate",
+    },
+    "trans_step4_text": {
+        "bn": "ডিপারচার স্ক্রিনে পরবর্তী ফ্লাইট নম্বর দেখে গেটে যান।",
+        "en": "Check the departure screens for your next flight and go to its gate.",
+    },
+    "trans_step5_title": {
+        "bn": "সংযোগের সময় কম?",
+        "en": "Tight connection?",
+    },
+    "trans_step5_text": {
+        "bn": "সময় কম থাকলে ট্রান্সফার ডেস্কের কর্মীকে জানান — তারা দ্রুত পথ দেখাবে।",
+        "en": "If your connection is tight, tell the transfer desk staff — they will fast-track you.",
