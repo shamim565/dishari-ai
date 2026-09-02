@@ -17,3 +17,11 @@ def format_clock(value, lang="en"):
     minute = value.minute
     hour12 = hour % 12 or 12
     if lang == "bn":
+        period = "রাত"
+        for hours, label in BANGLA_PERIODS:
+            if hour in hours:
+                period = label
+                break
+        return f"{period} {hour12}:{minute:02d}"
+    suffix = "AM" if hour < 12 else "PM"
+    return f"{hour12}:{minute:02d} {suffix}"
