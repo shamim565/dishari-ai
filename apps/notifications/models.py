@@ -35,3 +35,16 @@ class FlightEvent(models.Model):
     message_en = models.TextField()
     priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default=PRIORITY_NORMAL)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.flight.number} {self.kind} @ {self.created_at:%H:%M}"
+
+    def message(self, lang):
+        return self.message_bn if lang == "bn" else self.message_en
+
+    @property
+    def is_urgent(self):
+        return self.priority == self.PRIORITY_URGENT
