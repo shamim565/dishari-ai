@@ -42,3 +42,27 @@ def _matches(message, keywords):
 
 
 def detect_emergency(message, lang=DEFAULT_LANG):
+    for code, spec in EMERGENCY_SPECS.items():
+        if not _matches(message, spec["keywords"]):
+            continue
+        title = translate(spec["title_key"], lang)
+        text = translate(spec["text_key"], lang)
+        location = Location.objects.filter(code=spec["target"]).first()
+        target_name = ""
+        if location:
+            target_name = location.name_bn if lang == "bn" else location.name_en
+        return {
+            "code": code,
+            "text": f"{title}. {text}",
+            "event": {
+                "emergency": {
+                    "code": code,
+                    "title": title,
+                    "text": text,
+                    "target": spec["target"],
+                    "target_name": target_name,
+                    "nav_label": translate("navigate_btn", lang),
+                }
+            },
+        }
+    return None
