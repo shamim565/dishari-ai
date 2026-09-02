@@ -37,3 +37,15 @@ def _resolve(provider_env, model_env):
             "model": model,
         }
     return None
+
+
+def vision_setup():
+    return _resolve("VISION_PROVIDER", "VISION_MODEL")
+
+
+def chat_setup():
+    return _resolve("CHAT_PROVIDER", "CHAT_MODEL")
+
+
+def vision_available():
+    return vision_setup() is not None
