@@ -52,3 +52,27 @@ def ticket_data(flight, index=0):
 
     prefix = AIRLINE_TICKET_PREFIX.get(flight.airline.code, "000")
     ticket_number = f"{prefix}-{''.join(str(rng.randint(0, 9)) for _ in range(10))}"
+
+    base_fare = FARE_BY_DESTINATION.get(flight.destination.code, 40000)
+    fare = base_fare + rng.randint(0, 15) * 100
+    taxes = fare * 185 // 1000
+    taxes = taxes // 10 * 10
+
+    return {
+        "title": title,
+        "name_display": name_display,
+        "name_print": name_print,
+        "pnr": pnr,
+        "seat": SEATS[index % len(SEATS)],
+        "cabin": "ECONOMY",
+        "passenger_type": "ADULT",
+        "ticket_number": ticket_number,
+        "baggage": BAGGAGE_ALLOWANCE.get(flight.airline.code, "30 KG"),
+        "fare_basis": rng.choice(FARE_BASES),
+        "fare": fare,
+        "taxes": taxes,
+        "total": fare + taxes,
+        "issue_date": flight.date - timedelta(days=5),
+        "agent": "DHAKA TRAVEL AGENCY (DEMO)",
+        "form_of_payment": "CARD",
+    }
