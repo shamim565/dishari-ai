@@ -17,3 +17,12 @@
     {% if error %}
     <div class="error-banner mb-4"><span>Wrong PIN. Try again.</span></div>
     {% endif %}
+    <form method="post" action="{% url 'ops_login' %}">
+      {% csrf_token %}
+      <input type="password" name="pin" inputmode="numeric" placeholder="Operator PIN" class="ops-input" autofocus>
+      <button type="submit" class="btn-primary mt-3">Unlock panel</button>
+    </form>
+    <p class="mt-3 text-center text-[11px] text-slate-500">Demo PIN is set by OPS_PIN (default 1234)</p>
+  </div>
+</main>
+{% endblock %}
