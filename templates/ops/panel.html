@@ -98,3 +98,86 @@
             <input class="ops-input ops-input-sm" name="block" placeholder="A" value="{{ flight.checkin_block }}">
             <button class="ops-btn">Change counters</button>
           </form>
+
+          <form method="post" action="{% url 'ops_action' flight.pk 'gate-change' %}" class="ops-inline">
+            {% csrf_token %}
+            <input class="ops-input" name="gate" placeholder="Gate, e.g. 12" value="{{ flight.gate }}">
+            <div class="flex gap-1">
+              <button class="ops-btn" formaction="{% url 'ops_action' flight.pk 'gate-assign' %}">Assign gate</button>
+              <button class="ops-btn ops-btn-warn">Gate change</button>
+            </div>
+          </form>
+
+          <form method="post" action="{% url 'ops_action' flight.pk 'delay' %}" class="ops-inline">
+            {% csrf_token %}
+            <select class="ops-input" name="minutes">
+              <option value="30">+30 min</option>
+              <option value="60" selected>+1 hour</option>
+              <option value="120">+2 hours</option>
+              <option value="240">+4 hours</option>
+            </select>
+            <button class="ops-btn ops-btn-warn">Delay flight</button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="space-y-4">
+      <h2 class="text-[11px] uppercase tracking-widest text-slate-500">Passenger intelligence</h2>
+      <div class="card px-4 py-4">
+        <div class="flex flex-wrap gap-2">
+          <span class="chip chip-neutral"><span class="font-bengali">বাংলা</span> · {{ lang_split.bn }}</span>
+          <span class="chip chip-neutral">English · {{ lang_split.en }}</span>
+          <span class="chip chip-neutral">{{ message_total }} questions</span>
+        </div>
+        <div class="mt-4 space-y-2.5">
+          {% for topic in topics %}
+          <div>
+            <div class="flex items-center justify-between text-[11px]">
+              <span class="text-slate-300">{{ topic.label }}</span>
+              <span class="text-slate-500 tabular-nums">{{ topic.count }}</span>
+            </div>
+            <div class="mt-1 h-1.5 overflow-hidden rounded-full bg-white/5">
+              <div class="h-full rounded-full bg-amber-400/70" style="width: {{ topic.pct }}%"></div>
+            </div>
+          </div>
+          {% empty %}
+          <p class="text-center text-xs text-slate-500">No passenger questions yet.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <h2 class="text-[11px] uppercase tracking-widest text-slate-500">Recent events</h2>
+      <div class="card divide-y divide-white/5">
+        {% for event in events %}
+        <div class="px-4 py-3">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-xs font-semibold {{ event.is_urgent|yesno:'text-rose-300,text-slate-300' }}">{{ event.flight.number }} · {{ event.get_kind_display }}</span>
+            <span class="text-[11px] text-slate-500">{{ event.created_at|airport_time:"en" }}</span>
+          </div>
+          <p class="mt-1 text-[11px] leading-relaxed text-slate-500">{{ event.message_en|truncatechars:90 }}</p>
+        </div>
+        {% empty %}
+        <p class="px-4 py-6 text-center text-xs text-slate-500">No events yet. Trigger one above.</p>
+        {% endfor %}
+      </div>
+
+      <h2 class="text-[11px] uppercase tracking-widest text-slate-500">Live sessions</h2>
+      <div class="card divide-y divide-white/5">
+        {% for session in sessions %}
+        <div class="flex items-center justify-between gap-2 px-4 py-3">
+          <div class="min-w-0">
+            <p class="truncate text-xs font-medium">{{ session.passenger_name }}</p>
+            <p class="text-[11px] text-slate-500">{{ session.flight.number }} · {{ session.get_stage_display }} · {{ session.get_source_display }}</p>
+          </div>
+          <span class="chip chip-neutral shrink-0">{{ session.lang|upper }}</span>
+        </div>
+        {% empty %}
+        <p class="px-4 py-6 text-center text-xs text-slate-500">No active sessions.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
