@@ -43,3 +43,14 @@
     <a href="{% url 'home' %}?view=lost&amp;step={{ step_index|add:1 }}" hx-get="{% url 'home' %}?view=lost&amp;step={{ step_index|add:1 }}" hx-target="#content-panel" hx-swap="innerHTML" hx-push-url="true" class="btn-primary">{{ t.found_btn }}</a>
     <a href="{% url 'home' %}?view=lost&amp;step={{ step_index }}&amp;nf=1" hx-get="{% url 'home' %}?view=lost&amp;step={{ step_index }}&amp;nf=1" hx-target="#content-panel" hx-swap="innerHTML" hx-push-url="true" class="btn-secondary">{{ t.not_found_btn }}</a>
   </div>
+
+  <div class="flex gap-3">
+    <a href="{% url 'home' %}?view=lost&amp;step=0" hx-get="{% url 'home' %}?view=lost&amp;step=0" hx-target="#content-panel" hx-swap="innerHTML" hx-push-url="true" class="btn-secondary flex-1">{{ t.step_label }} 1</a>
+    <a href="{% url 'home' %}?view=map" hx-get="{% url 'home' %}?view=map" hx-target="#content-panel" hx-swap="innerHTML" hx-push-url="true" class="btn-secondary flex-1">{{ t.quick_map_tile }}</a>
+  </div>
+  {% else %}
+  <div class="info-banner"><span>{{ t.scan_qr_hint }}</span></div>
+  {% include "partials/_terminal_map.html" %}
+  <a href="{% url 'home' %}?view=map" hx-get="{% url 'home' %}?view=map" hx-target="#content-panel" hx-swap="innerHTML" hx-push-url="true" class="btn-primary">{{ t.quick_map_tile }}</a>
+  {% endif %}
+</div>
