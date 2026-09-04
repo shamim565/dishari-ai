@@ -34,3 +34,51 @@ SEGMENTS = [
     ("BLK_B", "PRAY", "The prayer room is at the south-east corner of the check-in hall.", "নামাজের ঘর চেক-ইন হলের দক্ষিণ-পূর্ব কোণে।", 50),
     ("BLK_A", "IMM", "Follow the big blue 'International Departure' sign and turn right for immigration.", "বড় নীল 'International Departure' সাইন অনুসরণ করুন — ডান দিকে ইমিগ্রেশন।", 150),
     ("BLK_B", "IMM", "Follow the big blue 'International Departure' sign straight ahead for immigration.", "বড় নীল 'International Departure' সাইন অনুসরণ করে সোজা ইমিগ্রেশনের দিকে যান।", 140),
+    ("IMM", "SEC", "After the passport counter, walk ahead to security screening and join the lane.", "পাসপোর্ট কাউন্টার শেষ করে সোজা এগিয়ে সিকিউরিটি স্ক্রিনিংয়ের লাইনে দাঁড়ান।", 90),
+    ("SEC", "AIR", "Pass through security and follow the corridor into the airside concourse.", "সিকিউরিটি পার হয়ে করিডোর ধরে এয়ারসাইড কনকোর্সে প্রবেশ করুন।", 75),
+    ("AIR", "GATE3", "Follow the corridor north; Gate 3 is at the far end.", "করিডোর ধরে উত্তরে যান — গেট ৩ একেবারে শেষ প্রান্তে।", 170),
+    ("AIR", "GATE4", "Follow the corridor north; Gate 4 is on your right.", "করিডোর ধরে উত্তরে যান — গেট ৪ ডান দিকে।", 130),
+    ("AIR", "GATE6", "Gate 6 is directly ahead off the main corridor.", "গেট ৬ মূল করিডোর থেকে একটু সামনেই।", 90),
+    ("AIR", "GATE8", "Follow the gate signs; Gate 8 is on the right side of the corridor.", "গেটের সাইন অনুসরণ করুন — গেট ৮ করিডোরের ডান দিকে।", 60),
+    ("AIR", "GATE12", "Follow the corridor south; Gate 12 is at the far end.", "করিডোর ধরে দক্ষিণে যান — গেট ১২ শেষ প্রান্তে।", 150),
+    ("AIR", "WC_A", "Toilets are beside Gate 4 on the corridor.", "টয়লেট গেট ৪-এর পাশে করিডোরের ধারে।", 55),
+    ("AIR", "FOOD", "The food court is on the south side of the airside concourse.", "ফুড কোর্ট এয়ারসাইড কনকোর্সের দক্ষিণ দিকে।", 80),
+    ("ENTRY", "MED", "The medical centre is just left of the entrance doors.", "মেডিকেল সেন্টার প্রবেশপথের বাঁ দিকেই।", 45),
+    ("INFO", "POLICE", "The police help desk is right beside the information desk.", "পুলিশ সহায়তা ডেস্ক ইনফরমেশন ডেস্কের ঠিক পাশেই।", 20),
+]
+
+
+class Command(BaseCommand):
+    help = "Seed the HSIA terminal layout: locations, route segments and QR marker codes."
+
+    @transaction.atomic
+    def handle(self, *args, **options):
+        RouteSegment.objects.all().delete()
+        Location.objects.all().delete()
+
+        index = {}
+        for code, name_en, name_bn, map_label, kind, block, x, y, qr in LOCATIONS:
+            index[code] = Location.objects.create(
+                code=code,
+                name_en=name_en,
+                name_bn=name_bn,
+                map_label=map_label,
+                kind=kind,
+                block=block,
+                x=x,
+                y=y,
+                qr_code=qr,
+            )
+
+        for from_code, to_code, instr_en, instr_bn, distance in SEGMENTS:
+            RouteSegment.objects.create(
+                from_location=index[from_code],
+                to_location=index[to_code],
+                instruction_en=instr_en,
+                instruction_bn=instr_bn,
+                distance_m=distance,
+            )
+
+        self.stdout.write(
+            self.style.SUCCESS(f"Seeded {len(LOCATIONS)} locations, {len(SEGMENTS)} route segments.")
+        )
