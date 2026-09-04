@@ -50,3 +50,19 @@
     {% endfor %}
   </div>
 </div>
+
+<script>
+  function renderNotifyState() {
+    const on = localStorage.getItem("notifyEnabled") !== "0";
+    document.getElementById("notify-state").textContent = on ? "{{ t.on_label|escapejs }}" : "{{ t.off_label|escapejs }}";
+    const btn = document.getElementById("notify-toggle");
+    btn.classList.toggle("chip-success", on);
+    btn.classList.toggle("chip-muted", !on);
+  }
+  function toggleNotify() {
+    const on = localStorage.getItem("notifyEnabled") !== "0";
+    localStorage.setItem("notifyEnabled", on ? "0" : "1");
+    renderNotifyState();
+  }
+  renderNotifyState();
+</script>
