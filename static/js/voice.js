@@ -253,3 +253,107 @@ const VoiceIO = (function () {
     }
     return new Blob([view], { type: "audio/wav" });
   }
+
+  async function listenFallback(sttUrl, csrf, lang, onResult, onEnd, onError) {
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (e) {
+      onError("not-allowed");
+      return null;
+    }
+    const ctx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
+    const source = ctx.createMediaStreamSource(stream);
+    const processor = ctx.createScriptProcessor(4096, 1, 1);
+    const chunks = [];
+    processor.onaudioprocess = (event) => {
+      chunks.push(new Float32Array(event.inputBuffer.getChannelData(0)));
+    };
+    source.connect(processor);
+    processor.connect(ctx.destination);
+
+    let stopped = false;
+    const stop = async () => {
+      if (stopped) return;
+      stopped = true;
+      processor.disconnect();
+      source.disconnect();
+      stream.getTracks().forEach((track) => track.stop());
+      ctx.close();
+      const total = chunks.reduce((sum, c) => sum + c.length, 0);
+      const samples = new Float32Array(total);
+      let position = 0;
+      for (const chunk of chunks) {
+        samples.set(chunk, position);
+        position += chunk.length;
+      }
+      const wav = encodeWav(samples, 16000);
+      const form = new FormData();
+      form.append("audio", wav, "voice.wav");
+      form.append("lang", lang);
+      try {
+        const response = await fetch(sttUrl, { method: "POST", headers: { "X-CSRFToken": csrf }, body: form });
+        if (response.status === 200) {
+          const payload = await response.json();
+          onResult((payload.text || "").trim(), true);
+        } else {
+          onError("error");
+        }
+      } catch (e) {
+        onError("error");
+      }
+      onEnd();
+    };
+    setTimeout(stop, 8000);
+    return { stop: stop };
+  }
+
+  function listen(lang, onResult, onEnd, onError, sttUrl, csrf) {
+    const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (Recognition) {
+      const recognition = new Recognition();
+      recognition.lang = lang;
+      recognition.interimResults = true;
+      recognition.continuous = false;
+      let finalText = "";
+      recognition.onresult = (event) => {
+        let interim = "";
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const result = event.results[i];
+          if (result.isFinal) finalText += result[0].transcript;
+          else interim += result[0].transcript;
+        }
+        onResult((finalText + " " + interim).trim(), false);
+      };
+      recognition.onerror = (event) => {
+        onError(event && event.error ? event.error : "error");
+      };
+      recognition.onend = () => {
+        onResult(finalText.trim(), true);
+        onEnd();
+      };
+      try {
+        recognition.start();
+      } catch (e) {
+        vlog("recognition.start threw", String(e));
+        onError("start-failed");
+        return null;
+      }
+      return { stop: () => recognition.stop() };
+    }
+    if (sttUrl) {
+      return listenFallback(sttUrl, csrf, lang, onResult, onEnd, onError);
+    }
+    onError("not-supported");
+    return null;
+  }
+
+  return {
+    sttSupported: sttSupported,
+    listen: listen,
+    speak: speak,
+    prefetch: prefetch,
+    stopSpeaking: stopSpeaking,
+    cancelSpeaking: cancelSpeaking,
+  };
+})();
