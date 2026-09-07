@@ -45,3 +45,27 @@ class TicketHandoff(models.Model):
         (STATUS_PENDING, "Waiting for phone"),
         (STATUS_READY, "Ticket received"),
     ]
+
+    token = models.CharField(max_length=64, unique=True, default=default_token)
+    lang = models.CharField(max_length=2, choices=[("bn", "Bangla"), ("en", "English")], default="bn")
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    journey = models.ForeignKey(
+        "journeys.JourneySession",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="handoffs",
+    )
+    phone_seen_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(default=default_handoff_expiry)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.token[:8]}… {self.status}"
+
+    @property
+    def is_expired(self):
+        return timezone.now() >= self.expires_at
