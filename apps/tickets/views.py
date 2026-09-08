@@ -203,3 +203,100 @@ def _kiosk_handoff_or_404(request, token):
 
 def ticket_handoff_status(request, token):
     """Polled by the kiosk panel every few seconds.
+
+    ``204`` while the phone has not finished; the journey panel fragment once
+    the phone upload is done (the kiosk session adopts the journey); a freshly
+    generated ticket panel when the QR has expired.
+    """
+    handoff = _kiosk_handoff_or_404(request, token)
+    if handoff.status == TicketHandoff.STATUS_READY and handoff.journey and handoff.journey.is_active:
+        attach_journey(request, handoff.journey)
+        return _journey_panel_fragment(request, handoff.journey)
+    if handoff.is_expired:
+        return _ticket_panel_fragment(request)
+    return HttpResponse(status=204)
+
+
+def ticket_handoff_hold(request, token):
+    """Tiny marker polled by the kiosk: present while the phone page is open."""
+    handoff = _kiosk_handoff_or_404(request, token)
+    return render(
+        request,
+        "partials/_handoff_hold.html",
+        {"handoff": handoff, "hold": hold_active(handoff)},
+    )
+
+
+def _phone_handoff_or_none(token):
+    return (
+        TicketHandoff.objects.select_related(
+            "journey", "journey__flight", "journey__flight__airline",
+            "journey__flight__origin", "journey__flight__destination",
+        )
+        .filter(token=token)
+        .first()
+    )
+
+
+def _phone_context(handoff, error_code=None):
+    done = handoff.status == TicketHandoff.STATUS_READY and handoff.journey is not None
+    return {
+        "handoff": handoff,
+        "journey": handoff.journey if done else None,
+        "flight": handoff.journey.flight if done else None,
+        "done": done,
+        "invalid_link": False,
+        "ai_available": registry.vision_available(),
+        "error_message": translate(ERROR_KEYS[error_code], handoff.lang) if error_code in ERROR_KEYS else None,
+    }
+
+
+def ticket_phone(request, token):
+    """The page the passenger's phone opens after scanning the kiosk QR."""
+    handoff = _phone_handoff_or_none(token)
+    if not handoff:
+        return render(request, "tickets/phone.html", {"invalid_link": True}, status=404)
+
+    if request.session.get("lang") != handoff.lang:
+        request.session["lang"] = handoff.lang
+    if handoff.is_expired:
+        return render(request, "tickets/phone.html", {"handoff": handoff, "invalid_link": True})
+    mark_phone_seen(handoff)
+
+    error = request.GET.get("e")
+    return render(request, "tickets/phone.html", _phone_context(handoff, error_code=error))
+
+
+@require_POST
+def ticket_phone_scan(request, token):
+    """Ticket upload coming from the passenger's phone."""
+    handoff = _phone_handoff_or_none(token)
+    if not handoff:
+        raise Http404
+    if handoff.is_expired or handoff.status == TicketHandoff.STATUS_READY:
+        return redirect("ticket_phone", token=token)
+    mark_phone_seen(handoff)
+
+    upload = request.FILES.get("ticket_image")
+    if not upload:
+        return redirect(f"{reverse('ticket_phone', args=[token])}?e=bad_file")
+
+    extraction, flight, code = _process_upload(upload.read())
+    if code:
+        return redirect(f"{reverse('ticket_phone', args=[token])}?e={code}")
+
+    journey = _create_journey(extraction=extraction, flight=flight, source="upload", lang=handoff.lang)
+    handoff.journey = journey
+    handoff.status = TicketHandoff.STATUS_READY
+    handoff.save(update_fields=["journey", "status"])
+    return redirect("ticket_phone", token=token)
+
+
+@require_POST
+def ticket_phone_ping(request, token):
+    """Keep-alive from the phone page — lets the kiosk hold its idle timer."""
+    handoff = _phone_handoff_or_none(token)
+    if not handoff or handoff.is_expired:
+        raise Http404
+    mark_phone_seen(handoff)
+    return HttpResponse(status=204)
