@@ -1,0 +1,6 @@
+<span id="ticket-hold" class="hidden"
+      hx-get="{% url 'ticket_handoff_hold' handoff.token %}"
+      hx-trigger="every 3s"
+      hx-target="this"
+      hx-swap="outerHTML"
+      {% if hold %}data-kiosk-hold{% endif %}></span>
