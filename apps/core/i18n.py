@@ -885,3 +885,63 @@ STRINGS = {
     "trans_step5_text": {
         "bn": "সময় কম থাকলে ট্রান্সফার ডেস্কের কর্মীকে জানান — তারা দ্রুত পথ দেখাবে।",
         "en": "If your connection is tight, tell the transfer desk staff — they will fast-track you.",
+    },
+    "arr_step1_title": {
+        "bn": "আগমন ইমিগ্রেশন",
+        "en": "Arrival immigration",
+    },
+    "arr_step1_text": {
+        "bn": "পাসপোর্ট ও প্রয়োজনীয় কাগজপত্র নিয়ে আগমন ইমিগ্রেশনে যান।",
+        "en": "Go to arrival immigration with your passport and travel documents.",
+    },
+    "arr_step2_title": {
+        "bn": "ব্যাগেজ ক্লেইম",
+        "en": "Baggage claim",
+    },
+    "arr_step2_text": {
+        "bn": "ডিসপ্লেতে ফ্লাইট নম্বর দেখে সঠিক বেল্ট থেকে ব্যাগ নিন।",
+        "en": "Check the screens for your flight number and collect your bags from the correct belt.",
+    },
+    "arr_step3_title": {
+        "bn": "কাস্টমস",
+        "en": "Customs",
+    },
+    "arr_step3_text": {
+        "bn": "ঘোষণা করার কিছু থাকলে red channel, না থাকলে green channel।",
+        "en": "Use the red channel if you have goods to declare, otherwise the green channel.",
+    },
+    "arr_step4_title": {
+        "bn": "প্রয়োজনীয় সেবা",
+        "en": "Useful services",
+    },
+    "arr_step4_text": {
+        "bn": "সিম, টাকা বিনিময় বা ট্যাক্সি লাগলে আগমন হলের কাউন্টার দেখুন।",
+        "en": "For a SIM, currency exchange or taxi, see the counters in the arrival hall.",
+    },
+    "arr_step5_title": {
+        "bn": "বহির্গমন",
+        "en": "Exit",
+    },
+    "arr_step5_text": {
+        "bn": "শেষ ধাপ: Exit সাইন ধরে বাইরে আসুন — পিকআপ ও ট্যাক্সি এখানেই।",
+        "en": "Final step: follow the Exit signs outside — pickups and taxis wait there.",
+    },
+    "boarded_arrival": {
+        "bn": "এরপর: ট্রানজিট ও আগমন গাইড",
+        "en": "Next: Transit & Arrival guide",
+    },
+    "emg_medical_title": {
+        "bn": "মেডিকেল সহায়তা",
+        "en": "Medical help",
+    },
+    "emg_medical_text": {
+        "bn": "শান্ত থাকুন। নিকটস্থ বিমানবন্দর কর্মীকে ডাকুন, অথবা মেডিকেল সেন্টারে যান — ল্যান্ডসাইডে প্রবেশপথের কাছে।",
+        "en": "Stay calm. Call the nearest airport staff member for help, or go to the medical centre near the landside entrance.",
+    },
+    "emg_doc_title": {
+        "bn": "পাসপোর্ট / নথি সহায়তা",
+        "en": "Passport / document help",
+    },
+    "emg_doc_text": {
+        "bn": "পাসপোর্ট বা টিকিট হারিয়ে গেলে বিমানবন্দর পুলিশ সহায়তা ডেস্কে যান এবং এয়ারলাইনের কাউন্টারেও জানান।",
+        "en": "If your passport or ticket is lost, go to the airport police help desk and also inform your airline counter.",
