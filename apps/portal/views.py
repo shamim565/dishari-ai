@@ -81,3 +81,12 @@ def home(request):
         view = _default_view(journey)
     if view == "journey" and not journey:
         view = "ticket"
+
+    # Phone finished an upload but the kiosk poll has not run yet — adopt it
+    # here so navigating around the dashboard cannot lose the finished scan.
+    if view == "ticket":
+        handoff = get_ready_handoff(request)
+        if handoff:
+            attach_journey(request, handoff.journey)
+            journey = handoff.journey
+            view = "journey"
