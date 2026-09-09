@@ -188,3 +188,93 @@ class UploadFlowTests(SeededTestCase):
         self.assertEqual(response.status_code, 302)
         self.assertIn("view=ticket", response["Location"])
         self.assertIn("e=ai", response["Location"])
+
+    def test_upload_with_mocked_extraction_creates_journey(self):
+        client = self.app_client()
+        setup = {"provider": "gemini", "model": "gemini-2.5-flash"}
+        with (
+            patch("apps.tickets.views.registry.vision_available", return_value=True),
+            patch("apps.tickets.views.extract_ticket_data", return_value=(EXTRACTION, setup)),
+        ):
+            upload = io.BytesIO(make_image_bytes())
+            upload.name = "ticket.jpg"
+            response = client.post(reverse("ticket_scan"), {"ticket_image": upload})
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], reverse("home") + "?view=journey")
+        journey = JourneySession.objects.get()
+        self.assertEqual(journey.source, "upload")
+        self.assertEqual(journey.pnr, "ABC123")
+        self.assertEqual(journey.seat, "22A")
+        scan = TicketScan.objects.get(source="upload", success=True)
+        self.assertEqual(scan.flight.number, "BG147")
+
+    def test_upload_extraction_failure_shows_generic_error(self):
+        client = self.app_client()
+        from apps.tickets.services import ExtractionFailed
+
+        with (
+            patch("apps.tickets.views.registry.vision_available", return_value=True),
+            patch("apps.tickets.views.extract_ticket_data", side_effect=ExtractionFailed("boom")),
+        ):
+            upload = io.BytesIO(make_image_bytes())
+            upload.name = "ticket.jpg"
+            response = client.post(reverse("ticket_scan"), {"ticket_image": upload})
+        self.assertIn("view=ticket", response["Location"])
+        self.assertIn("e=extract", response["Location"])
+
+
+class SeedTests(TestCase):
+    def test_seed_is_repeatable(self):
+        call_command("seed_demo")
+        call_command("seed_demo")
+        self.assertEqual(Flight.objects.filter(date=timezone.localdate()).count(), 8)
+
+
+class PhoneHandoffTests(SeededTestCase):
+    """Kiosk QR → passenger phone upload → kiosk adopts the journey."""
+
+    def start_handoff(self):
+        kiosk = self.app_client()
+        kiosk.get(reverse("home") + "?view=ticket")
+        return kiosk, TicketHandoff.objects.get()
+
+    def phone_upload(self, handoff, *, client=None):
+        phone = client or Client()
+        setup = {"provider": "gemini", "model": "gemini-2.5-flash"}
+        with (
+            patch("apps.tickets.views.registry.vision_available", return_value=True),
+            patch("apps.tickets.views.extract_ticket_data", return_value=(EXTRACTION, setup)),
+        ):
+            upload = io.BytesIO(make_image_bytes())
+            upload.name = "ticket.jpg"
+            return phone.post(reverse("ticket_phone_scan", args=[handoff.token]), {"ticket_image": upload})
+
+    # ---- kiosk panel ------------------------------------------------------
+
+    def test_kiosk_panel_shows_qr_and_creates_handoff(self):
+        kiosk, handoff = self.start_handoff()
+        response = kiosk.get(reverse("home") + "?view=ticket")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "data:image/png;base64")
+        self.assertContains(response, "ticket-hold")
+        self.assertContains(response, handoff.token)
+        self.assertEqual(kiosk.session.get(HANDOFF_KEY), handoff.token)
+
+    def test_kiosk_panel_reuses_pending_handoff(self):
+        kiosk, handoff = self.start_handoff()
+        kiosk.get(reverse("home") + "?view=ticket")
+        self.assertEqual(TicketHandoff.objects.count(), 1)
+        self.assertEqual(TicketHandoff.objects.get().token, handoff.token)
+
+    def test_expired_status_returns_fresh_panel_with_new_handoff(self):
+        kiosk, handoff = self.start_handoff()
+        handoff.expires_at = timezone.now() - timedelta(minutes=1)
+        handoff.save(update_fields=["expires_at"])
+
+        response = kiosk.get(reverse("ticket_handoff_status", args=[handoff.token]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "data:image/png;base64")
+        self.assertEqual(TicketHandoff.objects.count(), 2)
+        fresh = TicketHandoff.objects.exclude(pk=handoff.pk).get()
+        self.assertEqual(kiosk.session.get(HANDOFF_KEY), fresh.token)
