@@ -58,3 +58,26 @@
       hideWarning();
     }
   }
+
+  function activity() {
+    if (warning || ending) return;
+    lastActivity = Date.now();
+  }
+
+  ["pointerdown", "keydown", "touchstart", "scroll", "mousemove"].forEach(function (evt) {
+    window.addEventListener(evt, activity, { passive: true });
+  });
+
+  if (continueBtn) {
+    continueBtn.addEventListener("click", function () {
+      lastActivity = Date.now();
+      hideWarning();
+    });
+  }
+
+  window.addEventListener("pageshow", function (event) {
+    if (event.persisted) window.location.reload();
+  });
+
+  setInterval(tick, 1000);
+})();
