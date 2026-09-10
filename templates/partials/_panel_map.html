@@ -37,3 +37,20 @@
   {% endif %}
 
   {% include "partials/_terminal_map.html" %}
+
+  <section class="card p-4">
+    <h2 class="text-[11px] uppercase tracking-widest text-slate-500">{{ t.map_all_places }}</h2>
+    <div class="mt-3 grid grid-cols-2 gap-2">
+      {% for loc in locations %}
+      <a href="{% url 'home' %}?view=navigate&amp;to={{ loc.code }}" hx-get="{% url 'home' %}?view=navigate&amp;to={{ loc.code }}" hx-target="#content-panel" hx-swap="innerHTML" hx-push-url="true" class="place-row">
+        <span class="truncate">{{ loc|bn_name:lang }}</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5 shrink-0 text-slate-500" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/>
+        </svg>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+
+  <a href="{% url 'home' %}?view=lost" hx-get="{% url 'home' %}?view=lost" hx-target="#content-panel" hx-swap="innerHTML" hx-push-url="true" class="btn-secondary w-full">{{ t.lost_btn }}</a>
+</div>
