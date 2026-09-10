@@ -42,3 +42,18 @@
       {% endfor %}
     </ol>
   </section>
+
+  {% if target %}
+  <section>
+    <h2 class="text-[11px] uppercase tracking-widest text-slate-500">{{ t.look_for_sign }}</h2>
+    <div class="mt-2.5">
+      {% with location=target %}{% include "partials/_signage.html" %}{% endwith %}
+    </div>
+  </section>
+  {% endif %}
+  {% elif target %}
+  <div class="info-banner"><span>{{ t.no_route }}</span></div>
+  {% endif %}
+
+  <a href="{% url 'home' %}?view=lost" hx-get="{% url 'home' %}?view=lost" hx-target="#content-panel" hx-swap="innerHTML" hx-push-url="true" class="btn-secondary w-full">{{ t.lost_btn }}</a>
+</div>
