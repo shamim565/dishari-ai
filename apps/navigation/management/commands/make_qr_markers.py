@@ -59,3 +59,38 @@ def sheet_html(cards, base_url):
 </body>
 </html>
 """
+
+
+class Command(BaseCommand):
+    help = "Generate QR marker PNGs and a printable marker sheet for all locations with QR codes."
+
+    def add_arguments(self, parser):
+        parser.add_argument("--base-url", default=None, help="Public base URL encoded in the QR")
+
+    def handle(self, *args, **options):
+        base_url = (options["base_url"] or settings.BASE_URL).rstrip("/")
+        out_dir = Path(settings.BASE_DIR) / "demo_assets" / "qr_markers"
+        out_dir.mkdir(parents=True, exist_ok=True)
+
+        locations = Location.objects.exclude(qr_code=None).exclude(qr_code="").order_by("code")
+        cards = []
+        for loc in locations:
+            url = f"{base_url}/scan/{loc.qr_code}/"
+            img = build_qr(url)
+            img.save(out_dir / f"{loc.qr_code}.png")
+            buffer = io.BytesIO()
+            img.save(buffer, format="PNG")
+            cards.append(
+                {
+                    "code": loc.qr_code,
+                    "name_en": loc.name_en,
+                    "name_bn": loc.name_bn,
+                    "b64": base64.b64encode(buffer.getvalue()).decode("ascii"),
+                }
+            )
+            self.stdout.write(f"marker written: {out_dir / f'{loc.qr_code}.png'}")
+
+        sheet = sheet_html(cards, base_url)
+        sheet_path = out_dir / "marker_sheet.html"
+        sheet_path.write_text(sheet, encoding="utf-8")
+        self.stdout.write(self.style.SUCCESS(f"{len(locations)} markers + sheet at {sheet_path}"))
