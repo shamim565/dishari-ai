@@ -48,3 +48,14 @@
     {% endif %}
   </g>
   {% endfor %}
+
+  {% if current %}
+  {% if current.x > 850 %}
+  <text class="tm-you-label" x="{{ current.x|add:'-16' }}" y="{{ current.y|add:'-12' }}" text-anchor="end">{{ t.you_are_here }}</text>
+  {% elif current.x < 200 %}
+  <text class="tm-you-label" x="{{ current.x|add:'16' }}" y="{{ current.y|add:'-12' }}" text-anchor="start">{{ t.you_are_here }}</text>
+  {% else %}
+  <text class="tm-you-label" x="{{ current.x }}" y="{{ current.y|add:'-26' }}" text-anchor="middle">{{ t.you_are_here }}</text>
+  {% endif %}
+  {% endif %}
+</svg>
