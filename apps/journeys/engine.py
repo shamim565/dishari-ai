@@ -197,3 +197,19 @@ def next_action(journey):
         "warning_key": None,
         "advance_allowed": False,
     }
+
+
+def advance(journey):
+    index = stage_index(journey.stage)
+    if index < len(STAGE_SEQUENCE) - 1:
+        journey.stage = STAGE_SEQUENCE[index + 1]
+        journey.save(update_fields=["stage"])
+    return journey
+
+
+def regress(journey):
+    index = stage_index(journey.stage)
+    if index > 0:
+        journey.stage = STAGE_SEQUENCE[index - 1]
+        journey.save(update_fields=["stage"])
+    return journey
