@@ -196,3 +196,111 @@ class DashboardFlowTests(TestCase):
     def test_full_stage_walkthrough(self):
         client = self.app_client()
         self.start_journey(client)
+
+        response = client.get(reverse("home"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Go to the check-in counter")
+        self.assertContains(response, "17-20")
+
+        for expected in (
+            "Go to departure immigration",
+            "Clear security screening",
+            "Proceed airside towards your gate",
+            "Go to your boarding gate",
+            "Wait at the gate",
+            "Boarded",
+        ):
+            client.post(reverse("journey_advance"))
+            response = client.get(reverse("home"))
+            self.assertContains(response, expected)
+
+        journey = JourneySession.objects.get()
+        self.assertEqual(journey.stage, JourneySession.STAGE_BOARDED)
+
+    def test_regress_from_dashboard(self):
+        client = self.app_client()
+        self.start_journey(client)
+        client.post(reverse("journey_advance"))
+        client.post(reverse("journey_advance"))
+        client.post(reverse("journey_regress"))
+        journey = JourneySession.objects.get()
+        self.assertEqual(journey.stage, JourneySession.STAGE_CHECK_IN)
+
+    def test_dashboard_bangla(self):
+        client = self.app_client()
+        session = client.session
+        session["lang"] = "bn"
+        session.save()
+        self.start_journey(client)
+        response = client.get(reverse("home"))
+        self.assertContains(response, "চেক-ইন কাউন্টারে যান")
+        self.assertContains(response, "যাত্রার ধাপ")
+
+    def test_verified_continue_links_to_home(self):
+        client = self.app_client()
+        self.start_journey(client)
+        response = client.get(reverse("ticket_verified"))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("home"), response["Location"])
+
+
+class ArrivalGuideTests(TestCase):
+    def app_client(self, lang="en"):
+        client = Client()
+        session = client.session
+        session["lang"] = lang
+        session.save()
+        return client
+
+    def test_arrival_page_english(self):
+        client = self.app_client()
+        response = client.get(reverse("home") + "?view=arrival")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Transit &amp; Arrival Guide")
+        self.assertContains(response, "Baggage claim")
+
+    def test_arrival_page_bangla(self):
+        client = self.app_client(lang="bn")
+        response = client.get(reverse("home") + "?view=arrival")
+        self.assertContains(response, "ট্রানজিট")
+        self.assertContains(response, "ব্যাগেজ ক্লেইম")
+
+    def test_boarded_dashboard_links_to_arrival(self):
+        call_command("seed_demo")
+        client = self.app_client()
+        flight = Flight.objects.get(number="BG147")
+        client.post(reverse("ticket_demo_pick", args=[flight.pk]))
+        journey = JourneySession.objects.get()
+        journey.stage = JourneySession.STAGE_BOARDED
+        journey.save(update_fields=["stage"])
+        response = client.get(reverse("home"))
+        self.assertContains(response, "/?view=arrival")
+
+
+class PurgeSessionsTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed_demo")
+
+    def test_purge_removes_expired_journeys_and_stale_chat(self):
+        flight = Flight.objects.get(number="BG147")
+        old = create_journey(flight=flight, passenger_name="Old", source="demo")
+        old.expires_at = timezone.now() - timedelta(hours=48)
+        old.save(update_fields=["expires_at"])
+        ChatMessage.objects.create(journey=old, role="user", content="old message", lang="en")
+
+        fresh = create_journey(flight=flight, passenger_name="Fresh", source="demo")
+        ChatMessage.objects.create(journey=fresh, role="user", content="fresh message", lang="en")
+
+        anon = ChatMessage.objects.create(
+            journey=None, session_key="abc123", role="user", content="anon old", lang="en"
+        )
+        ChatMessage.objects.filter(pk=anon.pk).update(created_at=timezone.now() - timedelta(hours=48))
+
+        call_command("purge_sessions")
+
+        self.assertFalse(JourneySession.objects.filter(pk=old.pk).exists())
+        self.assertFalse(ChatMessage.objects.filter(content="old message").exists())
+        self.assertFalse(ChatMessage.objects.filter(content="anon old").exists())
+        self.assertTrue(JourneySession.objects.filter(pk=fresh.pk).exists())
+        self.assertTrue(ChatMessage.objects.filter(content="fresh message").exists())
