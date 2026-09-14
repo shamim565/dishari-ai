@@ -132,3 +132,30 @@ class Flight(models.Model):
         time_phase = self.time_status(now)
         manual = self.status if self.status in self.STATUS_PHASE_ORDER else self.STATUS_SCHEDULED
         return max(time_phase, manual, key=self.STATUS_PHASE_ORDER.index)
+
+    def display_status(self, now=None):
+        """Chip-friendly status: the delayed badge wins over in-progress phases,
+        but terminal states (departed / gate closed / cancelled) win over delayed."""
+        status = self.effective_status(now)
+        if status in (self.STATUS_DEPARTED, self.STATUS_GATE_CLOSED, self.STATUS_CANCELLED):
+            return status
+        if self.is_delayed:
+            return self.STATUS_DELAYED
+        return status
+
+    @property
+    def arrival_datetime(self):
+        if not self.duration_minutes:
+            return None
+        departure = datetime.combine(self.date, self.effective_departure)
+        return departure + timedelta(minutes=self.duration_minutes)
+
+    @property
+    def arrival_time(self):
+        arrival = self.arrival_datetime
+        return arrival.time().replace(second=0, microsecond=0) if arrival else None
+
+    @property
+    def arrives_next_day(self):
+        arrival = self.arrival_datetime
+        return bool(arrival and arrival.date() != self.date)
