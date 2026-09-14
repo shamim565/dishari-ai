@@ -46,3 +46,23 @@ def _journey_panel_fragment(request, journey):
     response = render(request, "partials/_panel_journey.html", context)
     response["HX-Push-Url"] = "/?view=journey"
     return response
+
+
+@require_POST
+def journey_advance(request):
+    journey = get_active_journey(request)
+    if journey:
+        engine.advance(journey)
+    if journey and request.headers.get("HX-Request"):
+        return _journey_panel_fragment(request, journey)
+    return redirect("home")
+
+
+@require_POST
+def journey_regress(request):
+    journey = get_active_journey(request)
+    if journey:
+        engine.regress(journey)
+    if journey and request.headers.get("HX-Request"):
+        return _journey_panel_fragment(request, journey)
+    return redirect("home")
