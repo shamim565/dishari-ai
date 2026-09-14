@@ -32,3 +32,8 @@ class FormatClockTests(TestCase):
         self.assertEqual(format_clock(time(21, 15), "bn"), "রাত 9:15")
         self.assertEqual(format_clock(time(1, 15), "bn"), "রাত 1:15")
         self.assertEqual(format_clock(time(0, 5), "bn"), "রাত 12:05")
+
+    def test_aware_datetime_localized_to_dhaka(self):
+        value = datetime(2026, 10, 10, 13, 30, tzinfo=dt_timezone.utc)
+        self.assertEqual(format_clock(value, "en"), "7:30 PM")
+        self.assertEqual(format_clock(value, "bn"), "সন্ধ্যা 7:30")
