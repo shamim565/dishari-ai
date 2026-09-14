@@ -140,3 +140,32 @@ class Command(BaseCommand):
 
         airports = {code: Airport.objects.create(code=code, city=city, name=name, bangla_city=bn) for code, city, name, bn in AIRPORTS}
         airlines = {code: Airline.objects.create(code=code, name=name, bangla_name=bn) for code, name, bn in AIRLINES}
+
+        today = timezone.localdate()
+        base = timezone.localtime(timezone.now())
+
+        def rel(minutes):
+            dt = base + timedelta(minutes=minutes)
+            if dt.date() != base.date():
+                return time(0, 5) if dt < base else time(23, 55)
+            return dt.time().replace(second=0, microsecond=0)
+
+        for spec in FLIGHTS:
+            Flight.objects.create(
+                number=spec["number"],
+                airline=airlines[spec["airline"]],
+                origin=airports["DAC"],
+                destination=airports[spec["destination"]],
+                date=today,
+                sched_departure=rel(spec["offset"]),
+                est_departure=rel(spec["est_offset"]) if "est_offset" in spec else None,
+                status=spec["status"],
+                checkin_open=spec.get("checkin_open", False),
+                checkin_block=spec.get("block", ""),
+                checkin_counters=spec.get("counters", ""),
+                gate=spec.get("gate", ""),
+                terminal=spec.get("terminal", ""),
+                duration_minutes=DURATIONS_MINUTES.get(spec["destination"], 240),
+            )
+
+        self.stdout.write(self.style.SUCCESS(f"Seeded {len(FLIGHTS)} flights for {today} ({len(airlines)} airlines, {len(airports)} airports)."))
