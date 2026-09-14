@@ -56,3 +56,25 @@ def tkey(key, lang="en"):
 
 @register.filter
 def duration_label(minutes, lang="en"):
+    try:
+        minutes = int(minutes)
+    except (TypeError, ValueError):
+        return ""
+    if minutes <= 0:
+        if minutes >= -30:
+            return translate("dur_now", lang)
+        hours, mins = divmod(-minutes, 60)
+        parts = []
+        if hours:
+            parts.append(f"{hours} {translate('dur_h', lang)}")
+        if mins:
+            parts.append(f"{mins} {translate('dur_m', lang)}")
+        parts.append(translate("dur_ago", lang))
+        return " ".join(parts)
+    hours, mins = divmod(minutes, 60)
+    parts = []
+    if hours:
+        parts.append(f"{hours} {translate('dur_h', lang)}")
+    if mins or not hours:
+        parts.append(f"{mins} {translate('dur_m', lang)}")
+    return " ".join(parts)
