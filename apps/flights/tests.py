@@ -65,3 +65,23 @@ class EffectiveStatusTests(TestCase):
     def test_cancelled_always_wins(self):
         flight = self.make(240, status=Flight.STATUS_CANCELLED)
         self.assertEqual(flight.effective_status(self.NOW), Flight.STATUS_CANCELLED)
+
+    def test_delayed_uses_estimated_departure(self):
+        flight = self.make(60, status=Flight.STATUS_DELAYED, est_minutes=120)
+        self.assertEqual(flight.effective_status(self.NOW), Flight.STATUS_CHECK_IN_OPEN)
+
+    def test_manual_status_advances_early(self):
+        flight = self.make(300, status=Flight.STATUS_BOARDING)
+        self.assertEqual(flight.effective_status(self.NOW), Flight.STATUS_BOARDING)
+
+    def test_clock_supersedes_stale_status(self):
+        flight = self.make(-300, status=Flight.STATUS_BOARDING)
+        self.assertEqual(flight.effective_status(self.NOW), Flight.STATUS_DEPARTED)
+
+    def test_display_status_keeps_delayed_badge(self):
+        flight = self.make(120, status=Flight.STATUS_DELAYED, est_minutes=120)
+        self.assertEqual(flight.display_status(self.NOW), Flight.STATUS_DELAYED)
+
+    def test_display_status_terminal_wins_over_delayed(self):
+        flight = self.make(-300, status=Flight.STATUS_DELAYED, est_minutes=-300)
+        self.assertEqual(flight.display_status(self.NOW), Flight.STATUS_DEPARTED)
