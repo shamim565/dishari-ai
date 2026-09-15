@@ -945,3 +945,80 @@ STRINGS = {
     "emg_doc_text": {
         "bn": "পাসপোর্ট বা টিকিট হারিয়ে গেলে বিমানবন্দর পুলিশ সহায়তা ডেস্কে যান এবং এয়ারলাইনের কাউন্টারেও জানান।",
         "en": "If your passport or ticket is lost, go to the airport police help desk and also inform your airline counter.",
+    },
+    "emg_child_title": {
+        "bn": "শিশু হারিয়ে গেছে?",
+        "en": "Lost child?",
+    },
+    "emg_child_text": {
+        "bn": "সাথে সাথে নিকটস্থ কর্মীকে জানান — নিরাপত্তা টিম ঘোষণা দেবে। শিশুর সাম্প্রতিক ছবি ও পোশাকের বিবরণ প্রস্তুত রাখুন।",
+        "en": "Tell the nearest airport staff immediately — the security team will make an announcement. Keep a recent photo and clothing details ready.",
+    },
+    "handoff_title": {
+        "bn": "কর্মীর সহায়তা নিন",
+        "en": "Get help from staff",
+    },
+    "handoff_text": {
+        "bn": "ইনফরমেশন ডেস্কের কর্মীরা সব দেখিয়ে দিতে পারবেন।",
+        "en": "The information desk staff can guide you personally.",
+    },
+    "kiosk_tap_start": {
+        "bn": "শুরু করতে স্ক্রিনে ট্যাপ করুন",
+        "en": "Tap anywhere to start",
+    },
+    "kiosk_attract_sub": {
+        "bn": "আপনার এআই পথসঙ্গী প্রস্তুত — টিকিট স্ক্যান করুন, পথ জেনে নিন, ভয়েসে জিজ্ঞেস করুন।",
+        "en": "Your AI travel guide is ready — scan your ticket, find your way, ask by voice.",
+    },
+    "kiosk_ended_title": {
+        "bn": "ধন্যবাদ!",
+        "en": "Thank you!",
+    },
+    "kiosk_ended_note": {
+        "bn": "আপনার সেশন শেষ হয়েছে। পরের যাত্রী শুরু করতে ট্যাপ করুন।",
+        "en": "Your session has ended. Next passenger, tap to start.",
+    },
+    "kiosk_end_btn": {
+        "bn": "সেশন শেষ করুন",
+        "en": "End session",
+    },
+    "kiosk_idle_title": {
+        "bn": "আপনি কি এখনো এখানে?",
+        "en": "Are you still there?",
+    },
+    "kiosk_idle_note": {
+        "bn": "আপনার সেশন শেষ হয়ে যাবে",
+        "en": "Your session will end in",
+    },
+    "kiosk_still_here_btn": {
+        "bn": "হ্যাঁ, আছি",
+        "en": "Yes, continue",
+    },
+    "kiosk_seconds": {
+        "bn": "সেকেন্ডে",
+        "en": "seconds",
+    },
+}
+
+
+class Translator:
+    def __init__(self, lang):
+        self.lang = lang if lang in LANGS else DEFAULT_LANG
+
+    def __getattr__(self, key):
+        entry = STRINGS.get(key)
+        if not entry:
+            return key
+        return entry.get(self.lang) or entry.get(DEFAULT_LANG) or key
+
+
+def translate(key, lang=DEFAULT_LANG):
+    entry = STRINGS.get(key)
+    if not entry:
+        return key
+    return entry.get(lang) or entry.get(DEFAULT_LANG) or key
+
+
+def strings_for(lang):
+    lang = lang if lang in LANGS else DEFAULT_LANG
+    return {key: value.get(lang) or value.get(DEFAULT_LANG) or key for key, value in STRINGS.items()}
