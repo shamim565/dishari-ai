@@ -278,3 +278,130 @@ class PhoneHandoffTests(SeededTestCase):
         self.assertEqual(TicketHandoff.objects.count(), 2)
         fresh = TicketHandoff.objects.exclude(pk=handoff.pk).get()
         self.assertEqual(kiosk.session.get(HANDOFF_KEY), fresh.token)
+
+    # ---- phone page -------------------------------------------------------
+
+    def test_phone_page_renders_and_syncs_language(self):
+        _kiosk, handoff = self.start_handoff()  # kiosk language: en
+        phone = Client()
+        response = phone.get(reverse("ticket_phone", args=[handoff.token]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Upload your ticket")
+        self.assertEqual(phone.session.get("lang"), "en")
+        handoff.refresh_from_db()
+        self.assertIsNotNone(handoff.phone_seen_at)
+
+    def test_phone_page_unknown_token(self):
+        response = Client().get(reverse("ticket_phone", args=["deadbeef"]))
+        self.assertEqual(response.status_code, 404)
+
+    def test_phone_page_expired_token(self):
+        _kiosk, handoff = self.start_handoff()
+        handoff.expires_at = timezone.now() - timedelta(minutes=1)
+        handoff.save(update_fields=["expires_at"])
+        response = Client().get(reverse("ticket_phone", args=[handoff.token]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "This link no longer works")
+
+    # ---- phone upload -----------------------------------------------------
+
+    def test_phone_upload_creates_journey_and_shows_done(self):
+        _kiosk, handoff = self.start_handoff()
+        phone = Client()
+        response = self.phone_upload(handoff, client=phone)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], reverse("ticket_phone", args=[handoff.token]))
+
+        handoff.refresh_from_db()
+        self.assertEqual(handoff.status, TicketHandoff.STATUS_READY)
+        journey = JourneySession.objects.get()
+        self.assertEqual(journey.pnr, "ABC123")
+        self.assertEqual(journey.seat, "22A")
+        self.assertEqual(journey.source, "upload")
+
+        response = phone.get(reverse("ticket_phone", args=[handoff.token]))
+        self.assertContains(response, "Ticket received")
+        self.assertContains(response, "BG147")
+        self.assertContains(response, "22A")
+
+    def test_phone_upload_bad_file_redirects_with_error(self):
+        _kiosk, handoff = self.start_handoff()
+        upload = io.BytesIO(b"not-an-image")
+        response = Client().post(reverse("ticket_phone_scan", args=[handoff.token]), {"ticket_image": upload})
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("e=bad_file", response["Location"])
+        handoff.refresh_from_db()
+        self.assertEqual(handoff.status, TicketHandoff.STATUS_PENDING)
+
+    def test_phone_upload_without_ai_key_shows_demo_advice(self):
+        _kiosk, handoff = self.start_handoff()
+        with patch("apps.tickets.views.registry.vision_available", return_value=False):
+            upload = io.BytesIO(make_image_bytes())
+            upload.name = "ticket.jpg"
+            response = Client().post(reverse("ticket_phone_scan", args=[handoff.token]), {"ticket_image": upload})
+        self.assertIn("e=ai", response["Location"])
+
+    def test_phone_upload_extraction_failure(self):
+        from apps.tickets.services import ExtractionFailed
+
+        _kiosk, handoff = self.start_handoff()
+        with (
+            patch("apps.tickets.views.registry.vision_available", return_value=True),
+            patch("apps.tickets.views.extract_ticket_data", side_effect=ExtractionFailed("boom")),
+        ):
+            upload = io.BytesIO(make_image_bytes())
+            upload.name = "ticket.jpg"
+            response = Client().post(reverse("ticket_phone_scan", args=[handoff.token]), {"ticket_image": upload})
+        self.assertIn("e=extract", response["Location"])
+
+    # ---- kiosk poll -------------------------------------------------------
+
+    def test_status_pending_is_204(self):
+        kiosk, handoff = self.start_handoff()
+        response = kiosk.get(reverse("ticket_handoff_status", args=[handoff.token]))
+        self.assertEqual(response.status_code, 204)
+
+    def test_status_ready_returns_journey_and_attaches_to_kiosk(self):
+        kiosk, handoff = self.start_handoff()
+        self.phone_upload(handoff)
+
+        response = kiosk.get(reverse("ticket_handoff_status", args=[handoff.token]))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["HX-Push-Url"], "/?view=journey")
+        self.assertContains(response, "BG147")
+        self.assertContains(response, "Go to the check-in counter")
+        handoff.refresh_from_db()
+        self.assertEqual(kiosk.session.get("journey_token"), handoff.journey.token)
+
+    def test_status_with_wrong_session_is_404(self):
+        _kiosk, handoff = self.start_handoff()
+        response = Client().get(reverse("ticket_handoff_status", args=[handoff.token]))
+        self.assertEqual(response.status_code, 404)
+
+    def test_ticket_view_flips_to_journey_when_handoff_ready(self):
+        kiosk, handoff = self.start_handoff()
+        self.phone_upload(handoff)
+
+        response = kiosk.get(reverse("home") + "?view=ticket")
+        self.assertContains(response, "Go to the check-in counter")
+        handoff.refresh_from_db()
+        self.assertEqual(kiosk.session.get("journey_token"), handoff.journey.token)
+
+    # ---- hold marker + pings ---------------------------------------------
+
+    def test_hold_marker_appears_after_phone_ping(self):
+        kiosk, handoff = self.start_handoff()
+        response = kiosk.get(reverse("ticket_handoff_hold", args=[handoff.token]))
+        self.assertNotContains(response, "data-kiosk-hold")
+
+        phone = Client()
+        response = phone.post(reverse("ticket_phone_ping", args=[handoff.token]))
+        self.assertEqual(response.status_code, 204)
+
+        response = kiosk.get(reverse("ticket_handoff_hold", args=[handoff.token]))
+        self.assertContains(response, "data-kiosk-hold")
+
+    def test_hold_endpoint_is_kiosk_scoped(self):
+        _kiosk, handoff = self.start_handoff()
+        response = Client().get(reverse("ticket_handoff_hold", args=[handoff.token]))
+        self.assertEqual(response.status_code, 404)
