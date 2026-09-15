@@ -137,3 +137,125 @@ class DemoReplyTests(ChatBaseTests):
         b"".join(response.streaming_content)
         self.assertTrue(ChatMessage.objects.filter(role="user", content="hello").exists())
         self.assertTrue(ChatMessage.objects.filter(role="assistant").exists())
+
+
+class LlmStreamTests(ChatBaseTests):
+    def test_llm_path_streams_and_saves(self):
+        client = self.app_client()
+        fake_setup = {"provider": "gemini", "model": "gemini-2.5-flash"}
+
+        def fake_stream(setup, messages):
+            self.assertIn("NEVER invent", messages[0]["content"])
+            yield "হ্যালো "
+            yield "বন্ধু!"
+
+        with (
+            patch("apps.chat.views.registry.chat_setup", return_value=fake_setup),
+            patch("apps.chat.views._llm_stream", side_effect=fake_stream),
+        ):
+            response = client.post(reverse("chat_send"), {"message": "Hi"})
+            events = parse_sse(b"".join(response.streaming_content))
+        text = "".join(e.get("delta", "") for e in events)
+        self.assertEqual(text, "হ্যালো বন্ধু!")
+        assistant = ChatMessage.objects.get(role="assistant")
+        self.assertEqual(assistant.source, "llm")
+        self.assertEqual(assistant.content, "হ্যালো বন্ধু!")
+
+    def test_llm_error_falls_back_to_apology(self):
+        client = self.app_client()
+        fake_setup = {"provider": "gemini", "model": "gemini-2.5-flash"}
+
+        def broken_stream(setup, messages):
+            raise RuntimeError("boom")
+            yield ""
+
+        with (
+            patch("apps.chat.views.registry.chat_setup", return_value=fake_setup),
+            patch("apps.chat.views._llm_stream", side_effect=broken_stream),
+        ):
+            response = client.post(reverse("chat_send"), {"message": "Hi"})
+            events = parse_sse(b"".join(response.streaming_content))
+        text = "".join(e.get("delta", "") for e in events)
+        self.assertIn("Sorry", text)
+        assistant = ChatMessage.objects.get(role="assistant")
+        self.assertEqual(assistant.source, "demo")
+
+
+class EmergencyTests(ChatBaseTests):
+    def test_medical_emergency_bypasses_llm(self):
+        client = self.app_client(lang="bn")
+        fake_setup = {"provider": "gemini", "model": "gemini-2.5-flash"}
+        with (
+            patch("apps.chat.views.registry.chat_setup", return_value=fake_setup),
+            patch("apps.chat.views._llm_stream") as llm,
+        ):
+            response = client.post(reverse("chat_send"), {"message": "আমি অসুস্থ, দরকার"})
+            events = parse_sse(b"".join(response.streaming_content))
+        llm.assert_not_called()
+        text = "".join(e.get("delta", "") for e in events)
+        self.assertIn("মেডিকেল", text)
+        cards = [e["emergency"] for e in events if "emergency" in e]
+        self.assertEqual(len(cards), 1)
+        self.assertEqual(cards[0]["target"], "MED")
+
+    def test_documents_emergency(self):
+        client = self.app_client(lang="bn")
+        response = client.post(reverse("chat_send"), {"message": "আমার পাসপোর্ট হারিয়ে গেছে"})
+        events = parse_sse(b"".join(response.streaming_content))
+        cards = [e["emergency"] for e in events if "emergency" in e]
+        self.assertEqual(len(cards), 1)
+        self.assertEqual(cards[0]["target"], "POLICE")
+
+    def test_child_emergency(self):
+        client = self.app_client()
+        response = client.post(reverse("chat_send"), {"message": "I can't find my child"})
+        events = parse_sse(b"".join(response.streaming_content))
+        cards = [e["emergency"] for e in events if "emergency" in e]
+        self.assertEqual(len(cards), 1)
+        self.assertEqual(cards[0]["target"], "INFO")
+
+    def test_handoff_event_on_unknown_question(self):
+        client = self.app_client()
+        response = client.post(reverse("chat_send"), {"message": "xyzzyzz blorp"})
+        events = parse_sse(b"".join(response.streaming_content))
+        handoffs = [e["handoff"] for e in events if "handoff" in e]
+        self.assertEqual(len(handoffs), 1)
+        self.assertEqual(handoffs[0]["target"], "INFO")
+
+    def test_transit_intent(self):
+        client = self.app_client(lang="bn")
+        response = client.post(reverse("chat_send"), {"message": "আমার কানেক্টিং ফ্লাইট আছে"})
+        events = parse_sse(b"".join(response.streaming_content))
+        text = "".join(e.get("delta", "") for e in events)
+        self.assertIn("Transfers", text)
+
+    def test_arrival_intent(self):
+        client = self.app_client()
+        response = client.post(reverse("chat_send"), {"message": "What happens after landing?"})
+        events = parse_sse(b"".join(response.streaming_content))
+        text = "".join(e.get("delta", "") for e in events)
+        self.assertIn("baggage claim", text)
+
+
+class LiveLogTests(ChatBaseTests):
+    def test_live_log_stores_messages(self):
+        client = self.app_client()
+        response = client.post(
+            reverse("chat_live_log"),
+            {"input": "আমার গেট কোথায়?", "output": "আপনার গেট ১২ নম্বর।"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(ChatMessage.objects.filter(source="live").count(), 2)
+
+    def test_live_log_emergency_event(self):
+        client = self.app_client()
+        response = client.post(reverse("chat_live_log"), {"input": "আমি অসুস্থ", "output": ""})
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertIn("event", payload)
+        self.assertEqual(payload["event"]["emergency"]["code"], "medical")
+
+    def test_live_log_empty_returns_400(self):
+        client = self.app_client()
+        response = client.post(reverse("chat_live_log"), {"input": "", "output": ""})
+        self.assertEqual(response.status_code, 400)
