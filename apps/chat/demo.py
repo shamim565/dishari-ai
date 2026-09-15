@@ -231,3 +231,84 @@ def demo_reply(message, journey, request, lang=DEFAULT_LANG):
                 "Follow the check-in signs in the hall." + DEMO_NOTICE[lang]
             )
         return _reply(FALLBACK[lang])
+
+    if _contains(message, "immigration"):
+        reply = {
+            "bn": "ডিপারচার ইমিগ্রেশনে পাসপোর্ট ও প্রস্থান কার্ড দেখান। বড় নীল 'International Departure' সাইন অনুসরণ করুন।",
+            "en": "Clear departure immigration with your passport and departure card. Follow the big blue 'International Departure' sign.",
+        }[lang]
+        return _reply(reply + DEMO_NOTICE[lang])
+
+    if _contains(message, "security"):
+        reply = {
+            "bn": "ইমিগ্রেশনের পর এগিয়ে সিকিউরিটি স্ক্রিনিংয়ে হ্যান্ড ব্যাগ স্ক্যানারে দিন।",
+            "en": "After immigration, proceed to security screening and send your hand luggage through the scanner.",
+        }[lang]
+        return _reply(reply + DEMO_NOTICE[lang])
+
+    if _contains(message, "toairside"):
+        reply = {
+            "bn": "সিকিউরিটি পার হয়ে এয়ারসাইড করিডোরে যান — সেখান থেকে গেটের সাইন অনুসরণ করুন।",
+            "en": "Pass security into the airside corridor, then follow the gate signs.",
+        }[lang]
+        return _reply(reply + DEMO_NOTICE[lang])
+
+    if _contains(message, "toilet"):
+        current = get_current_location(request)
+        airside = current and current.kind in ("airside", "gate")
+        if lang == "bn":
+            reply = (
+                "এয়ারসাইডে টয়লেট গেট ৪-এর পাশে; ল্যান্ডসাইডে চেক-ইন হলের উত্তর-পূর্ব দিকে।"
+                if airside
+                else "টয়লেট চেক-ইন হলের উত্তর-পূর্ব দিকে, সিঁড়ির কাছে।"
+            )
+        else:
+            reply = (
+                "Airside toilets are beside Gate 4; landside ones are in the north-east of the check-in hall."
+                if airside
+                else "Toilets are on the north-east side of the check-in hall, near the stairs."
+            )
+        return _reply(reply + DEMO_NOTICE[lang])
+
+    if _contains(message, "food"):
+        reply = {
+            "bn": "ফুড কোর্ট এয়ারসাইড কনকোর্সের দক্ষিণ দিকে। বোর্ডিং শুরুর অন্তত ২০ মিনিট আগে গেটে পৌঁছে যাওয়ার পরিকল্পনা করুন।",
+            "en": "The food court is on the south side of the airside concourse. Plan to be back at your gate at least 20 minutes before boarding.",
+        }[lang]
+        return _reply(reply + DEMO_NOTICE[lang])
+
+    if _contains(message, "lost"):
+        if journey:
+            target_key = STAGE_NAV_TARGETS.get(journey.stage)
+            target, _notice = resolve_target(target_key, journey)
+            if target:
+                refresh_location_index()
+                origin = (
+                    get_current_location(request)
+                    or Location.objects.filter(code="ENTRY").first()
+                )
+                route = find_route(origin, target)
+                if route and route.steps:
+                    step = route.steps[0]
+                    text = step.instruction_bn if lang == "bn" else step.instruction_en
+                    head = {"bn": "চিন্তা করবেন না। ", "en": "Don't worry. "}[lang]
+                    return _reply(head + text + DEMO_NOTICE[lang])
+        return _reply(FALLBACK[lang], [_handoff_event(request, lang)])
+
+    if not journey:
+        return _reply(FALLBACK[lang], [_handoff_event(request, lang)])
+    return _reply(journey_hint(journey, lang), [_handoff_event(request, lang)])
+
+
+def journey_hint(journey, lang):
+    action = engine.next_action(journey)
+    title = translate(action["title_key"], lang)
+    if lang == "bn":
+        return (
+            f"আপনার পরবর্তী কাজ: {title}। বিস্তারিত জানতে জিজ্ঞেস করুন \u201cএখন আমি কী করব?\u201d"
+            + DEMO_NOTICE[lang]
+        )
+    return (
+        f"Your next task: {title}. Ask \u201cWhat should I do now?\u201d for details."
+        + DEMO_NOTICE[lang]
+    )
