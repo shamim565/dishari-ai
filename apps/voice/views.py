@@ -72,3 +72,41 @@ def tts(request):
     response["X-TTS-Provider"] = used or ""
     response["Cache-Control"] = "public, max-age=86400"
     return response
+
+
+@require_POST
+def stt(request):
+    if not azure.azure_configured():
+        return JsonResponse({"detail": "stt_unavailable"}, status=503)
+    upload = request.FILES.get("audio")
+    if not upload:
+        return JsonResponse({"detail": "empty"}, status=400)
+    raw = upload.read()
+    if len(raw) > MAX_STT_BYTES:
+        return JsonResponse({"detail": "too_large"}, status=413)
+    try:
+        text = azure.recognize_wav(raw, _lang(request))
+    except Exception:
+        return JsonResponse({"detail": "stt_error"}, status=502)
+    return JsonResponse({"text": text})
+
+
+@require_POST
+def live_token(request):
+    if not live.live_configured():
+        return JsonResponse({"detail": "live_unavailable"}, status=503)
+    lang = _lang(request)
+    journey = get_active_journey(request)
+    try:
+        token = live.mint_token()
+    except Exception:
+        return JsonResponse({"detail": "live_token_error"}, status=502)
+    return JsonResponse(
+        {
+            "token": token,
+            "ws_url": live.LIVE_WS_URL,
+            "model": live.live_model(),
+            "config": live.session_config(journey, request, lang),
+            "ctx_hash": live.context_hash(journey, request, lang),
+        }
+    )
