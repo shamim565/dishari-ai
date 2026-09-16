@@ -80,3 +80,16 @@ def recognize_wav(wav_bytes, lang):
     url = (
         f"https://{azure_region()}.stt.speech.microsoft.com/speech/recognition/"
         f"conversation/cognitiveservices/v1?language={locale}"
+    )
+    headers = {
+        "Ocp-Apim-Subscription-Key": azure_key(),
+        "Content-Type": "audio/wav; codecs=audio/pcm; samplerate=16000",
+        "Accept": "application/json",
+    }
+    with httpx.Client(timeout=STT_TIMEOUT) as client:
+        response = client.post(url, headers=headers, content=wav_bytes)
+    response.raise_for_status()
+    payload = response.json()
+    if payload.get("RecognitionStatus") != "Success":
+        return ""
+    return payload.get("DisplayText", "")
