@@ -76,3 +76,29 @@
     }
     window.dispatchEvent(new Event("dishari:notify"));
   }
+
+  async function poll() {
+    try {
+      let url = config.pollUrl;
+      if (lastId === null) {
+        const peek = await fetch(config.pollUrl + "?peek=1");
+        if (!peek.ok) return;
+        const payload = await peek.json();
+        lastId = payload.latest || 0;
+        return;
+      }
+      const response = await fetch(config.pollUrl + "?after=" + lastId);
+      if (!response.ok) return;
+      const payload = await response.json();
+      for (const event of payload.events) {
+        lastId = Math.max(lastId, event.id);
+        handleEvent(event);
+      }
+    } catch (e) {}
+  }
+
+  window.addEventListener("load", () => {
+    poll();
+    setInterval(poll, POLL_MS);
+  });
+})();
