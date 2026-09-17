@@ -59,3 +59,26 @@ class AssistantVoiceModeTests(TestCase):
         response = Client().get(reverse("assistant") + "?voice=live")
         self.assertContains(response, 'window.VOICE_MODE = "live"')
         self.assertContains(response, "live-config")
+
+    def test_live_without_key_falls_back_to_tts(self):
+        with patch("apps.portal.views.live_api.live_configured", return_value=False):
+            response = Client().get(reverse("assistant") + "?voice=live")
+        self.assertContains(response, 'window.VOICE_MODE = "tts"')
+
+
+class SessionEndTests(TestCase):
+    def test_session_end_flushes_and_returns_home(self):
+        client = Client()
+        session = client.session
+        session["journey_token"] = "abc123"
+        session["lang"] = "en"
+        session.save()
+        response = client.post(reverse("session_end"))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], reverse("home"))
+        self.assertIsNone(client.session.get("journey_token"))
+        self.assertIsNone(client.session.get("lang"))
+
+    def test_session_end_requires_post(self):
+        response = Client().get(reverse("session_end"))
+        self.assertEqual(response.status_code, 405)
