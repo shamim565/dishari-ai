@@ -316,3 +316,120 @@ function chatApp() {
         if (self.phase === "listening") self.phase = "idle";
         if (self.sessionActive) onEmptyTurn();
       };
+
+      this.recognition = VoiceIO.listen(
+        this.config.sttLang,
+        (text, isFinal) => {
+          if (token !== self.sessionToken) return;
+          clearListenWatchdog();
+          if (isFinal) finalize(text);
+        },
+        () => {
+          if (!finished) finalize("");
+        },
+        (code) => fail(code),
+        this.config.sttUrl,
+        this.config.csrf
+      );
+      if (!this.recognition) {
+        finalize("");
+        return;
+      }
+      if (this.browserStt) {
+        listenWatchdog = setTimeout(() => {
+          listenWatchdog = null;
+          if (finished) return;
+          chatVlog("listen watchdog fired");
+          try {
+            if (self.recognition && self.recognition.stop) self.recognition.stop();
+          } catch (e) {}
+          fail("no-events");
+        }, 9000);
+      }
+    },
+
+    cancelSpeech() {
+      this.speakToken++;
+      if (typeof VoiceIO !== "undefined") VoiceIO.cancelSpeaking();
+      this.phase = "idle";
+    },
+
+    speakFiller() {
+      const filler = this.labels.filler;
+      if (!filler || typeof VoiceIO === "undefined") return;
+      VoiceIO.speak(filler, this.config.lang, this.config.ttsUrl, this.config.csrf);
+    },
+
+    replayLast() {
+      if (this.lastSpoken) this.speakText(this.lastSpoken, false);
+    },
+
+    speakText(text, chainAfter) {
+      if (typeof VoiceIO === "undefined" || !text) {
+        this.phase = "idle";
+        return;
+      }
+      this.phase = "speaking";
+      const token = ++this.speakToken;
+      const sessToken = this.sessionToken;
+      VoiceIO.speak(text, this.config.lang, this.config.ttsUrl, this.config.csrf, () => {
+        if (token !== this.speakToken) return;
+        this.lastSpoken = text;
+        this.phase = "idle";
+        if (chainAfter && this.sessionActive && this.canSession && !this.paused && sessToken === this.sessionToken) {
+          this.scheduleNextListen();
+        }
+      });
+    },
+
+    async send(message) {
+      const text = (message || "").trim();
+      if (!text || this.sending) return;
+      this.sending = true;
+      this.voiceMessage = "";
+      this.clearTimers();
+      this.phase = "thinking";
+      this.speakFiller();
+      let reply = "";
+
+      try {
+        const body = new URLSearchParams({ message: text });
+        const response = await fetch(this.config.sendUrl, {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": this.config.csrf,
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: body,
+        });
+        if (!response.ok || !response.body) throw new Error("bad_response");
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const parts = buffer.split("\n\n");
+          buffer = parts.pop();
+          for (const part of parts) {
+            if (!part.startsWith("data: ")) continue;
+            let payload;
+            try {
+              payload = JSON.parse(part.slice(6));
+            } catch (e) {
+              continue;
+            }
+            if (payload.delta) reply += payload.delta;
+            if (payload.done) chatVlog("reply complete", reply.length, "chars");
+          }
+        }
+      } catch (e) {
+        chatVlog("send failed", String(e));
+        if (!reply) reply = this.config.errorText || "";
+      }
+      this.sending = false;
+      this.speakText(reply.trim(), true);
+    },
+  };
+}
