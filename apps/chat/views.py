@@ -141,3 +141,31 @@ def chat_send(request):
                 request, journey, role="assistant", content=text, lang=lang, source=source
             )
             yield _sse({"done": True, "message_id": saved.pk})
+
+    response = StreamingHttpResponse(stream(), content_type="text/event-stream")
+    response["Cache-Control"] = "no-cache"
+    response["X-Accel-Buffering"] = "no"
+    return response
+
+
+@require_POST
+def live_log(request):
+    input_text = (request.POST.get("input") or "").strip()[:MAX_MESSAGE_CHARS]
+    output_text = (request.POST.get("output") or "").strip()[:2000]
+    if not input_text and not output_text:
+        return JsonResponse({"detail": "empty"}, status=400)
+
+    lang = _lang(request)
+    journey = get_active_journey(request)
+    if input_text:
+        _store_message(request, journey, role="user", content=input_text, lang=lang, source="live")
+    if output_text:
+        _store_message(
+            request, journey, role="assistant", content=output_text, lang=lang, source="live"
+        )
+
+    payload = {"stored": True}
+    emergency = detect_emergency(input_text, lang) if input_text else None
+    if emergency:
+        payload["event"] = emergency["event"]
+    return JsonResponse(payload)
