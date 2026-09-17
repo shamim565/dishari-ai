@@ -90,3 +90,18 @@ def home(request):
             attach_journey(request, handoff.journey)
             journey = handoff.journey
             view = "journey"
+
+    context = panel_context(request, journey, view)
+
+    if request.headers.get("HX-Request"):
+        return render(request, f"partials/_panel_{view}.html", context)
+
+    context.update({"journey": journey, "view": view})
+    return render(request, "portal/home.html", context)
+
+
+@require_POST
+def session_end(request):
+    detach_journey(request)
+    request.session.flush()
+    return redirect("home")
