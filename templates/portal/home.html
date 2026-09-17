@@ -28,3 +28,18 @@
   </section>
 </div>
 {% endblock %}
+
+{% block extra_js %}
+<script>
+  (function () {
+    function pingAssistant() {
+      var frame = document.querySelector(".assistant-frame");
+      if (frame && frame.contentWindow) {
+        frame.contentWindow.postMessage({ type: "dishari:context-check" }, window.location.origin);
+      }
+    }
+    document.body.addEventListener("htmx:afterSwap", pingAssistant);
+    window.addEventListener("dishari:notify", pingAssistant);
+  })();
+</script>
+{% endblock %}
