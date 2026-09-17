@@ -37,3 +37,42 @@
       "pauseHint": "{{ t.voice_pause_hint|escapejs }}",
       "paused": "{{ t.voice_paused|escapejs }}",
       "noSpeech": "{{ t.voice_no_speech|escapejs }}",
+      "langUnsupported": "{{ t.voice_lang_unsupported|escapejs }}",
+      "errorHeard": "{{ t.voice_error_heard|escapejs }}",
+      "sessionGreeting": "{{ t.voice_session_greeting|escapejs }}",
+      "filler": "{{ t.voice_filler|escapejs }}"
+    }
+  }
+  </script>
+  <script id="live-config" type="application/json">
+  {
+    "tokenUrl": "{% url 'voice_live_token' %}",
+    "contextUrl": "{% url 'voice_live_context' %}",
+    "logUrl": "{% url 'chat_live_log' %}",
+    "csrf": "{{ csrf_token }}",
+    "lang": "{{ lang }}",
+    "fallbackUrl": "{% url 'assistant' %}?voice=tts&fallback=1",
+    "labels": {
+      "tapToSpeak": "{{ t.voice_tap_to_speak|escapejs }}",
+      "listening": "{{ t.chat_listening|escapejs }}",
+      "connecting": "{{ t.voice_connecting|escapejs }}",
+      "speaking": "{{ t.voice_speaking|escapejs }}",
+      "stopHint": "{{ t.voice_stop_hint|escapejs }}",
+      "end": "{{ t.voice_end|escapejs }}",
+      "fallback": "{{ t.voice_live_fallback|escapejs }}",
+      "micError": "{{ t.voice_mic_error|escapejs }}",
+      "connLost": "{{ t.voice_conn_lost|escapejs }}"
+    }
+  }
+  </script>
+  <script src="{% static 'js/chat.js' %}"></script>
+  <script src="{% static 'js/live.js' %}"></script>
+  <script>
+    window.VOICE_MODE = "{{ voice_mode }}";
+    function voiceApp() {
+      if (window.VOICE_MODE === "live" && typeof liveApp === "function") return liveApp();
+      return chatApp();
+    }
+  </script>
+</body>
+</html>
