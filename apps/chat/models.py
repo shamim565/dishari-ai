@@ -21,3 +21,9 @@ class ChatMessage(models.Model):
     lang = models.CharField(max_length=2, default="en")
     source = models.CharField(max_length=10, choices=SOURCE_CHOICES, default=SOURCE_LLM)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"{self.role}: {self.content[:40]}"
