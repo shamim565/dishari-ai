@@ -7,3 +7,11 @@
     <div class="min-w-0">
       <p class="text-sm font-semibold">{{ t.verified_title }}</p>
       <p class="mt-0.5 text-xs text-slate-400">
+        {{ journey.passenger_name }}
+        {% if journey.seat %}· {{ t.seat_label }} {{ journey.seat }}{% endif %}
+        {% if journey.pnr %}· {{ t.pnr_label }} {{ journey.pnr }}{% endif %}
+      </p>
+    </div>
+  </div>
+  {% include "partials/_journey_panel.html" %}
+</div>
