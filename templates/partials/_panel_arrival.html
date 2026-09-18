@@ -24,3 +24,20 @@
       {% endfor %}
     </ol>
   </section>
+
+  <section class="card px-4 py-4">
+    <h2 class="text-[11px] uppercase tracking-widest text-emerald-300">{{ t.arrival_section }}</h2>
+    <ol class="tl mt-3.5">
+      {% for step in arrival_steps %}
+      <li class="tl-item tl-done">
+        {% if not forloop.last %}<span class="tl-line" aria-hidden="true"></span>{% endif %}
+        <span class="tl-marker">{{ forloop.counter }}</span>
+        <span class="tl-label">
+          <span class="block text-sm font-semibold text-slate-200">{{ step.title }}</span>
+          <span class="mt-0.5 block text-xs leading-relaxed text-slate-400">{{ step.text }}</span>
+        </span>
+      </li>
+      {% endfor %}
+    </ol>
+  </section>
+</div>
