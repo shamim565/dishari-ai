@@ -153,3 +153,13 @@ def build_system_prompt(journey, request, lang=DEFAULT_LANG):
         f"[Airport places]\n{places_context(lang)}\n\n"
         f"[Emergency resources]\n{emergency_context(lang)}\n"
     )
+
+
+def emergency_context(lang=DEFAULT_LANG):
+    lines = []
+    for code in ("MED", "POLICE", "INFO"):
+        loc = Location.objects.filter(code=code).first()
+        if loc:
+            name = loc.name_bn if lang == "bn" else loc.name_en
+            lines.append(f"- {name} ({code})")
+    return "\n".join(lines)
