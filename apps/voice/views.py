@@ -110,3 +110,17 @@ def live_token(request):
             "ctx_hash": live.context_hash(journey, request, lang),
         }
     )
+
+
+@require_GET
+def live_context(request):
+    if not live.live_configured():
+        return JsonResponse({"detail": "live_unavailable"}, status=503)
+    lang = _lang(request)
+    journey = get_active_journey(request)
+    return JsonResponse(
+        {
+            "hash": live.context_hash(journey, request, lang),
+            "context": live.context_text(journey, request, lang),
+        }
+    )
