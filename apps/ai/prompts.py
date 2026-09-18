@@ -33,3 +33,16 @@ TICKET_INSTRUCTION = (
     "confidence is a number between 0 and 1 describing overall extraction confidence. "
     "Use null for any field that is not readable or not present."
 )
+
+
+def ticket_messages(data_uri):
+    return [
+        {"role": "system", "content": TICKET_SYSTEM_PROMPT},
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": TICKET_INSTRUCTION},
+                {"type": "image_url", "image_url": {"url": data_uri}},
+            ],
+        },
+    ]
