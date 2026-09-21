@@ -206,3 +206,45 @@ docker compose -f docker-compose.vps.yml exec web python manage.py seed_demo
 
 Optional — regenerate the demo ticket PNGs inside the container (the files
 land in the container's `demo_assets/`; fonts are bundled):
+
+```bash
+docker compose -f docker-compose.vps.yml exec web python manage.py make_tickets
+```
+
+The ops panel **Reset demo data** button (PIN-gated) re-seeds flights and the
+layout too. Note it does **not** regenerate the ticket PNGs — run `make_tickets`
+afterwards if you use it on a new day.
+
+## 10. Optional: basic auth for `/ops/` + `/admin/`
+
+Off by default. To add a browser password prompt on top of the PIN / Django login:
+
+```bash
+cd /opt/dishari-ai
+docker run --rm httpd:alpine htpasswd -nbB <user> '<password>' > .htpasswd
+chmod 640 .htpasswd
+```
+
+1. Add the mount to the `nginx` service in `docker-compose.vps.yml`:
+   `- ./.htpasswd:/etc/nginx/.htpasswd:ro`
+2. Add the two `auth_basic*` lines to the `/ops/` and `/admin/` blocks in
+   `deploy/vps/kiosk-nginx.conf` (copy them from the travel-persona config
+   pattern).
+3. Apply: `docker compose -f docker-compose.vps.yml up -d nginx`
+
+Recreate `.htpasswd` before the first `up` — a missing bind-mount source is
+created as a directory by Docker and nginx fails to start.
+
+## Troubleshooting
+
+| Symptom                      | Cause / fix                                                                                   |
+| ---------------------------- | --------------------------------------------------------------------------------------------- |
+| `400 DisallowedHost`         | `ALLOWED_HOSTS` missing the domain or `localhost`                                             |
+| `502 Bad Gateway`            | `web` container down → `docker compose -f docker-compose.vps.yml ps`, `logs web`              |
+| Static 404                   | `collectstatic` failed or static volume not mounted → check `logs web`                        |
+| CSRF failure                 | outer proxy not sending `X-Forwarded-Proto`; check `CSRF_TRUSTED_ORIGINS` and the nginx `map` |
+| `nginx: [emerg]` on reload   | snippet references a missing cert file — issue the cert first (step 4)                        |
+| certbot challenge fails      | DNS not propagated, or Cloudflare proxy is orange — set DNS only                              |
+| Phone can't open the QR      | `BASE_URL` must be the public https URL; re-check step 2 and restart                          |
+| Voice dead on the kiosk      | microphone requires HTTPS — use the `https://dishari...` URL, not the IP                      |
+| basic-auth 500s (if enabled) | `.htpasswd` missing or is a directory — recreate the file (step 10)                           |
