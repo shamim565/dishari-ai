@@ -126,3 +126,83 @@ cp /opt/ruletheday-backend/nginx/nginx.conf \
 # (to replace an existing block, drop it first between the markers:)
 #   sed -i '/# BEGIN airport-kiosk/,/# END airport-kiosk/d' \
 #     /opt/ruletheday-backend/nginx/nginx.conf
+
+docker exec ruletheday-backend-nginx-1 nginx -t
+docker restart ruletheday-backend-nginx-1
+```
+
+`nginx -t` must pass before applying; the appended block only matches
+`dishari.tourismbangladesh.live` (exact `server_name` beats their `_`
+catch-all). Their sites are unaffected. Restart (not `-s reload`): the config is
+a single-file bind mount, so a replaced file keeps its old inode in the
+container.
+
+## 6. Verify live
+
+```bash
+curl -fsS https://dishari.tourismbangladesh.live/health/
+```
+
+Browser checklist:
+
+- Kiosk dashboard opens: voice assistant band on the left, QR ticket panel on
+  the right; tap the mic once — HTTPS satisfies the microphone requirement
+- Scan the QR with a phone (mobile data is fine — `BASE_URL` is public) →
+  upload the demo ticket photo → the kiosk switches to the journey by itself
+- `/ops/` accepts the `OPS_PIN`; `/admin/` accepts the superuser login
+- Re-check `ruletheday.app` / `api.ruletheday.app` and
+  `persona.tourismbangladesh.live` still respond
+
+## 7. Backups + housekeeping (cron)
+
+SQLite is backed up with the Python `sqlite3` online backup API inside the
+container (safe while the app runs), then copied out of the volume.
+
+```bash
+mkdir -p /opt/dishari-ai-backups
+crontab -e
+```
+
+```cron
+# 03:00 — consistent SQLite backup
+0 3 * * * cd /opt/dishari-ai && docker compose -f docker-compose.vps.yml exec -T web python -c "import sqlite3; s=sqlite3.connect('/data/db.sqlite3'); d=sqlite3.connect('/data/db-backup.sqlite3'); s.backup(d); d.close(); s.close()" && docker compose -f docker-compose.vps.yml cp web:/data/db-backup.sqlite3 /opt/dishari-ai-backups/db-$(date +\%F).sqlite3
+
+# 03:15 — kiosk housekeeping (expired journeys, chats, handoffs, sessions)
+15 3 * * * cd /opt/dishari-ai && docker compose -f docker-compose.vps.yml exec -T web python manage.py purge_sessions
+
+# 03:20 — retention: keep 14 days
+20 3 * * * find /opt/dishari-ai-backups -name 'db-*.sqlite3' -mtime +14 -delete
+```
+
+Restore:
+
+```bash
+docker compose -f docker-compose.vps.yml stop web
+docker compose -f docker-compose.vps.yml cp /opt/dishari-ai-backups/db-<date>.sqlite3 web:/data/db.sqlite3
+docker compose -f docker-compose.vps.yml start web
+```
+
+## 8. Updates
+
+```bash
+cd /opt/dishari-ai
+git pull
+docker compose -f docker-compose.vps.yml up -d --build
+```
+
+`entrypoint.sh` runs migrations and collectstatic on start. `.env` stays
+untouched. If `deploy/vps/ruletheday-snippet.conf` changes in the repo, re-apply
+the block (replace between the `# BEGIN/# END airport-kiosk` markers) and
+restart the ruletheday nginx.
+
+## 9. Demo-day operations
+
+`seed_demo` always seeds **the current date** (Asia/Dhaka) and replaces the old
+data, so run it on every demo day:
+
+```bash
+docker compose -f docker-compose.vps.yml exec web python manage.py seed_demo
+```
+
+Optional — regenerate the demo ticket PNGs inside the container (the files
+land in the container's `demo_assets/`; fonts are bundled):
