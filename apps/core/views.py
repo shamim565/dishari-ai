@@ -27,3 +27,16 @@ def set_lang(request, code):
         request.session["lang"] = code
         request.session["lang_chosen"] = True
     return redirect(safe_next(request.GET.get("next")) or "home")
+
+
+def i18n_json(request):
+    lang = request.GET.get("lang") or request.session.get("lang", DEFAULT_LANG)
+    return JsonResponse({"lang": lang if lang in LANGS else DEFAULT_LANG, "strings": strings_for(lang)})
+
+
+def service_worker(request):
+    path = finders.find("sw.js")
+    if not path:
+        raise Http404
+    with open(path, "rb") as fh:
+        return HttpResponse(fh.read(), content_type="application/javascript")
