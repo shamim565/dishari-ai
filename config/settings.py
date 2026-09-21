@@ -87,3 +87,14 @@ LANGUAGE_CODE = "en-us"
 TIME_ZONE = "Asia/Dhaka"
 USE_I18N = True
 USE_TZ = True
+
+STATIC_URL = "/static/"
+STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+SESSION_COOKIE_AGE = 60 * 60 * 12
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
