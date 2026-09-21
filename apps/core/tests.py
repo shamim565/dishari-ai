@@ -37,3 +37,20 @@ class FormatClockTests(TestCase):
         value = datetime(2026, 10, 10, 13, 30, tzinfo=dt_timezone.utc)
         self.assertEqual(format_clock(value, "en"), "7:30 PM")
         self.assertEqual(format_clock(value, "bn"), "সন্ধ্যা 7:30")
+
+    def test_none_is_empty(self):
+        self.assertEqual(format_clock(None), "")
+
+
+class DurationLabelTests(TestCase):
+    def test_recent_due_is_now(self):
+        self.assertEqual(duration_label(-5, "bn"), translate("dur_now", "bn"))
+        self.assertEqual(duration_label(0, "en"), translate("dur_now", "en"))
+
+    def test_long_past_shows_ago(self):
+        self.assertIn("ago", duration_label(-675, "en"))
+        self.assertIn("আগে", duration_label(-675, "bn"))
+        self.assertIn("11", duration_label(-675, "en"))
+
+    def test_future_unchanged(self):
+        self.assertEqual(duration_label(90, "en"), "1 h 30 m")
