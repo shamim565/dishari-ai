@@ -164,3 +164,70 @@ Tap mic → spoken greeting → continuous voice conversation → ticket upload 
 ## Kiosk operation (shared device)
 
 The app **is** the kiosk — it always runs in kiosk mode:
+
+- The dashboard opens directly: pure voice assistant (left) + ticket / journey tools (right)
+- The voice session starts with one tap on the mic (browser requirement for audio), speaks the greeting, then runs hands-free until **⏹** or idle
+- A session resets after `KIOSK_IDLE_SECONDS` of inactivity (an "আছেন?" warning appears 15 seconds before) or when the passenger taps **সেশন শেষ করুন** in the header — both return to a **fresh dashboard** with no inherited journey or chat
+- Pages load with no-store behavior via the service worker's network-first strategy, so back navigation can't resurrect the previous passenger's screens
+
+Housekeeping — delete expired journeys, stale chats and expired browser sessions:
+
+```bash
+uv run manage.py purge_sessions            # default grace: 24h
+# cron example (hourly)
+0 * * * * cd /path/to/app && .venv/bin/python manage.py purge_sessions
+```
+
+`/ops/` stays reachable by PIN; the operator can use the same machine between passengers, or a separate device.
+
+## Configuration (`.env`)
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `DEBUG` | `1` | Debug mode |
+| `SECRET_KEY` | dev key | Django secret |
+| `ALLOWED_HOSTS` | `*` | Comma-separated hosts |
+| `BASE_URL` | `http://localhost:8000` | Public URL embedded in QR codes — set to your LAN IP / tunnel so phones can open it |
+| `KIOSK_IDLE_SECONDS` | `120` | Idle timeout before the passenger session auto-resets |
+| `CSRF_TRUSTED_ORIGINS` | — | Needed when demoing via HTTPS tunnel |
+| `OPS_PIN` | `1234` | PIN for the operator panel (`/ops/`) |
+
+## Tests
+
+```bash
+uv run manage.py test
+```
+
+## Sprint roadmap
+
+| Sprint | Feature | Status |
+|---|---|---|
+| 1 | Passenger entry + app shell (PWA) | ✅ consolidated into the kiosk dashboard |
+| 2 | Ticket photo → AI extraction (Gemini/GPT) → AODB validation → journey session + demo picker | ✅ done |
+| 3 | Journey engine + personalized dashboard + countdowns | ✅ done |
+| 4 | Indoor SVG map + landmark navigation + QR location markers | ✅ done |
+| 5 | AI chat + guaranteed Bangla voice (STT/TTS) | ✅ done |
+| 6 | Live events, notifications + operator demo panel | ✅ done |
+| 7 | Transit & arrival guidance, emergency intents, handoff, analytics, demo kit | ✅ done — **MVP complete** |
+
+## Project structure
+
+```
+config/            Django project (settings, urls)
+apps/core/         i18n (Bangla/English), shared views, make_assets command, ui templatetags
+apps/portal/       kiosk dashboard + session lifecycle (idle reset, session end)
+apps/flights/      mock AODB (Airline, Airport, Flight) + seed_demo command
+apps/journeys/     JourneySession, journey engine (stages, next-action, countdowns), dashboard
+apps/tickets/      upload, AI extraction, flight matching, demo picker, phone-handoff QR flow, make_tickets command
+apps/navigation/   terminal layout (Location, RouteSegment), BFS directions engine, SVG map, QR markers
+apps/ai/           switchable provider registry (Gemini ⇄ OpenAI), vision client, prompts
+apps/chat/         ChatMessage history, guardrailed LLM chat (SSE), demo-mode responder
+apps/voice/        Azure Speech REST (bn-BD TTS/STT) + cache
+apps/notifications/ FlightEvent engine (8 event types), polling API, operator panel (PIN-gated)
+templates/         base shell + htmx partials (bilingual)
+static/            vendored htmx/Alpine/Tailwind, app.css, sw.js, manifest, icons
+demo_assets/       generated QR codes, scan sheet, sample ticket images
+deploy/vps/        nginx configs for the Contabo VPS (inner + ruletheday snippet)
+Dockerfile · docker-compose.vps.yml   production container stack (web + nginx)
+docs/              VPS deployment runbook (dishari.tourismbangladesh.live)
+```
